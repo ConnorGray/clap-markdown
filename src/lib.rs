@@ -1,91 +1,10 @@
 //! Autogenerate Markdown documentation for clap command-line tools
 //!
-//! <!-- ## Simple example -->
+//! See [**Examples**][Examples] for examples of the content `clap-markdown`
+//! generates.
 //!
-/*! ## Complex example
-```
-# use std::path::PathBuf;
-# use pretty_assertions::assert_eq;
-#
-use clap::{Parser, Subcommand};
-
-//-------------------------------
-// Define a clap command-line app
-//-------------------------------
-
-/// An example command-line tool
-#[derive(Parser)]
-#[command(name = "complex-app")]
-struct Cli {
-    /// Optional name to operate on
-    name: Option<String>,
-
-    /// Sets a custom config file
-    #[arg(short, long, value_name = "FILE")]
-    config: Option<PathBuf>,
-
-    /// Turn debugging information on
-    #[arg(short, long, action = clap::ArgAction::Count)]
-    debug: u8,
-
-    #[command(subcommand)]
-    command: Option<Commands>,
-}
-
-#[derive(Subcommand)]
-enum Commands {
-    /// does testing things
-    Test {
-        /// lists test values
-        #[arg(short, long)]
-        list: bool,
-    },
-}
-
-//----------------------------
-// Generate Markdown for `Cli`
-//----------------------------
-
-assert_eq!(clap_markdown::help_markdown::<Cli>(), "\
-* [`complex-app`↴](#complex-app)
-* [`complex-app test`↴](#complex-app-test)
-
-### `complex-app`
-
-An example command-line tool
-
-**Usage:** `complex-app [OPTIONS] [NAME] [COMMAND]`
-
-####### **Commands:**
-
-* `test` — does testing things
-
-####### **Arguments:**
-
-* `<NAME>` — Optional name to operate on
-
-####### **Options:**
-
-* `-c`, `--config` — Sets a custom config file
-* `-d`, `--debug` — Turn debugging information on
-
-
-
-### `complex-app test`
-
-does testing things
-
-**Usage:** `complex-app test [OPTIONS]`
-
-####### **Options:**
-
-* `-l`, `--list` — lists test values
-
-
-
-");
-```
-*/
+//! [Examples]: https://github.com/ConnorGray/clap-markdown#Examples
+//!
 
 // Ensure that doc tests in the README.md file get run.
 #[doc(hidden)]
