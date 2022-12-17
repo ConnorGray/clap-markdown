@@ -2,6 +2,8 @@
 
 This document contains the help content for the `complex-app` command-line program.
 
+**Command Overview:**
+
 * [`complex-app`↴](#complex-app)
 * [`complex-app test`↴](#complex-app-test)
 

@@ -76,6 +76,8 @@ fn write_help_markdown(buffer: &mut String, command: &clap::Command) {
     // build_table_of_contents_html(buffer, Vec::new(), command, 0).unwrap();
     // writeln!(buffer, "</ul></div>").unwrap();
 
+    writeln!(buffer, "**Command Overview:**\n").unwrap();
+
     build_table_of_contents_markdown(buffer, Vec::new(), command, 0).unwrap();
 
     write!(buffer, "\n").unwrap();
