@@ -13,6 +13,9 @@ pub struct Cli {
     #[arg(short, long, value_name = "FILE")]
     config: Option<PathBuf>,
 
+    #[arg(long)]
+    target: Option<Target>,
+
     /// Turn debugging information on
     #[arg(short, long, action = clap::ArgAction::Count)]
     debug: u8,
@@ -29,4 +32,11 @@ enum Commands {
         #[arg(short, long)]
         list: bool,
     },
+}
+
+#[derive(clap::ValueEnum)]
+#[derive(Clone)]
+enum Target {
+    Local,
+    Remote,
 }

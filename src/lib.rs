@@ -15,6 +15,8 @@ mod test_readme {
 
 use std::fmt::{self, Write};
 
+use clap::builder::PossibleValue;
+
 /// Format the help information for `command` as Markdown.
 pub fn help_markdown<C: clap::CommandFactory>() -> String {
     let command = C::command();
@@ -329,6 +331,27 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
         writeln!(buffer, " — {help}")?;
     } else {
         writeln!(buffer)?;
+    }
+
+    //--------------------
+    // Arg possible values
+    //--------------------
+
+    let possible_values: Vec<PossibleValue> = arg
+        .get_possible_values()
+        .into_iter()
+        .filter(|pv| !pv.is_hide_set())
+        .collect();
+
+    if !possible_values.is_empty() {
+        let text: String = possible_values
+            .iter()
+            // TODO: Show PossibleValue::get_help(), and PossibleValue::get_name_and_aliases().
+            .map(|pv| format!("`{}`", pv.get_name()))
+            .collect::<Vec<String>>()
+            .join(", ");
+
+        writeln!(buffer, "\n  *Possible Values:* {text}\n")?;
     }
 
     Ok(())

@@ -18,6 +18,10 @@ An example command-line tool
 ###### **Options:**
 
 * `-c`, `--config` — Sets a custom config file
+* `--target`
+
+  *Possible Values:* `local`, `remote`
+
 * `-d`, `--debug` — Turn debugging information on
 
 
