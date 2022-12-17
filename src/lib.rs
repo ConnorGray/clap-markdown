@@ -94,7 +94,7 @@ mod test_readme {
 }
 
 
-use std::fmt::Write;
+use std::fmt::{self, Write};
 
 /// Format the help information for `command` as Markdown.
 pub fn help_markdown<C: clap::CommandFactory>() -> String {
@@ -340,21 +340,7 @@ fn build_command_markdown(
         writeln!(buffer, "###### **Arguments:**\n")?;
 
         for pos_arg in command.get_positionals() {
-            debug_assert!(
-                pos_arg.get_short().is_none() && pos_arg.get_long().is_none()
-            );
-
-            write!(
-                buffer,
-                "* `<{}>`",
-                pos_arg.get_id().to_string().to_ascii_uppercase()
-            )?;
-
-            if let Some(help) = pos_arg.get_help() {
-                writeln!(buffer, " — {help}")?;
-            } else {
-                writeln!(buffer)?;
-            }
+            write_arg_markdown(buffer, pos_arg)?;
         }
 
         write!(buffer, "\n")?;
@@ -373,23 +359,7 @@ fn build_command_markdown(
         writeln!(buffer, "###### **Options:**\n")?;
 
         for arg in non_pos {
-            // Markdown list item
-            write!(buffer, "* ")?;
-
-            match (arg.get_short(), arg.get_long()) {
-                (Some(short), Some(long)) => {
-                    write!(buffer, "`-{}`, `--{}`", short, long)?
-                },
-                (Some(short), None) => write!(buffer, "`-{}`", short)?,
-                (None, Some(long)) => write!(buffer, "`--{}`", long)?,
-                (None, None) => {
-                    unreachable!("non-positional Arg with neither short nor long name: {arg:?}")
-                },
-            }
-
-            if let Some(help) = arg.get_help() {
-                writeln!(buffer, " — {}", help)?;
-            }
+            write_arg_markdown(buffer, arg)?;
         }
 
         write!(buffer, "\n")?;
@@ -410,6 +380,36 @@ fn build_command_markdown(
             subcommand,
             depth + 1,
         )?;
+    }
+
+    Ok(())
+}
+
+fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
+    // Markdown list item
+    write!(buffer, "* ")?;
+
+    match (arg.get_short(), arg.get_long()) {
+        (Some(short), Some(long)) => {
+            write!(buffer, "`-{}`, `--{}`", short, long)?
+        },
+        (Some(short), None) => write!(buffer, "`-{}`", short)?,
+        (None, Some(long)) => write!(buffer, "`--{}`", long)?,
+        (None, None) => {
+            debug_assert!(arg.is_positional(), "unexpected non-positional Arg with neither short nor long name: {arg:?}");
+
+            write!(
+                buffer,
+                "`<{}>`",
+                arg.get_id().to_string().to_ascii_uppercase()
+            )?;
+        },
+    }
+
+    if let Some(help) = arg.get_help() {
+        writeln!(buffer, " — {help}")?;
+    } else {
+        writeln!(buffer)?;
     }
 
     Ok(())
