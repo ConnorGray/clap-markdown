@@ -1,91 +1,10 @@
 //! Autogenerate Markdown documentation for clap command-line tools
 //!
-//! <!-- ## Simple example -->
+//! See [**Examples**][Examples] for examples of the content `clap-markdown`
+//! generates.
 //!
-/*! ## Complex example
-```
-# use std::path::PathBuf;
-# use pretty_assertions::assert_eq;
-#
-use clap::{Parser, Subcommand};
-
-//-------------------------------
-// Define a clap command-line app
-//-------------------------------
-
-/// An example command-line tool
-#[derive(Parser)]
-#[command(name = "complex-app")]
-struct Cli {
-    /// Optional name to operate on
-    name: Option<String>,
-
-    /// Sets a custom config file
-    #[arg(short, long, value_name = "FILE")]
-    config: Option<PathBuf>,
-
-    /// Turn debugging information on
-    #[arg(short, long, action = clap::ArgAction::Count)]
-    debug: u8,
-
-    #[command(subcommand)]
-    command: Option<Commands>,
-}
-
-#[derive(Subcommand)]
-enum Commands {
-    /// does testing things
-    Test {
-        /// lists test values
-        #[arg(short, long)]
-        list: bool,
-    },
-}
-
-//----------------------------
-// Generate Markdown for `Cli`
-//----------------------------
-
-assert_eq!(clap_markdown::help_markdown::<Cli>(), "\
-* [`complex-app`↴](#complex-app)
-* [`complex-app test`↴](#complex-app-test)
-
-### `complex-app`
-
-An example command-line tool
-
-**Usage:** `complex-app [OPTIONS] [NAME] [COMMAND]`
-
-####### **Commands:**
-
-* `test` — does testing things
-
-####### **Arguments:**
-
-* `<NAME>` — Optional name to operate on
-
-####### **Options:**
-
-* `-c`, `--config` — Sets a custom config file
-* `-d`, `--debug` — Turn debugging information on
-
-
-
-### `complex-app test`
-
-does testing things
-
-**Usage:** `complex-app test [OPTIONS]`
-
-####### **Options:**
-
-* `-l`, `--list` — lists test values
-
-
-
-");
-```
-*/
+//! [Examples]: https://github.com/ConnorGray/clap-markdown#Examples
+//!
 
 // Ensure that doc tests in the README.md file get run.
 #[doc(hidden)]
@@ -94,7 +13,9 @@ mod test_readme {
 }
 
 
-use std::fmt::Write;
+use std::fmt::{self, Write};
+
+use clap::builder::PossibleValue;
 
 /// Format the help information for `command` as Markdown.
 pub fn help_markdown<C: clap::CommandFactory>() -> String {
@@ -131,12 +52,31 @@ pub fn print_help_markdown<C: clap::CommandFactory>() {
 
 fn write_help_markdown(buffer: &mut String, command: &clap::Command) {
     //----------------------------------
+    // Write the document title
+    //----------------------------------
+
+    let title_name = match command.get_display_name() {
+        Some(display_name) => display_name.to_owned(),
+        None => format!("`{}`", command.get_name())
+    };
+
+    writeln!(buffer, "# Command-Line Help for {title_name}\n").unwrap();
+
+    writeln!(
+        buffer,
+        "This document contains the help content for the `{}` command-line program.\n",
+        command.get_name()
+    ).unwrap();
+
+    //----------------------------------
     // Write the table of contents
     //----------------------------------
 
     // writeln!(buffer, r#"<div style="background: light-gray"><ul>"#).unwrap();
     // build_table_of_contents_html(buffer, Vec::new(), command, 0).unwrap();
     // writeln!(buffer, "</ul></div>").unwrap();
+
+    writeln!(buffer, "**Command Overview:**\n").unwrap();
 
     build_table_of_contents_markdown(buffer, Vec::new(), command, 0).unwrap();
 
@@ -147,6 +87,18 @@ fn write_help_markdown(buffer: &mut String, command: &clap::Command) {
     //----------------------------------------
 
     build_command_markdown(buffer, Vec::new(), command, 0).unwrap();
+
+    //-----------------
+    // Write the footer
+    //-----------------
+
+    write!(buffer, r#"<hr/>
+
+<small><i>
+    This document was generated automatically by
+    <a href="https://crates.io/crates/clap-markdown"><code>clap-markdown</code></a>.
+</i></small>
+"#).unwrap();
 }
 
 fn build_table_of_contents_markdown(
@@ -311,7 +263,7 @@ fn build_command_markdown(
     //----------------------------------
 
     if command.get_subcommands().next().is_some() {
-        writeln!(buffer, "###### **Commands:**\n")?;
+        writeln!(buffer, "###### **Subcommands:**\n")?;
 
         for subcommand in command.get_subcommands() {
             if subcommand.is_hide_set() {
@@ -340,21 +292,7 @@ fn build_command_markdown(
         writeln!(buffer, "###### **Arguments:**\n")?;
 
         for pos_arg in command.get_positionals() {
-            debug_assert!(
-                pos_arg.get_short().is_none() && pos_arg.get_long().is_none()
-            );
-
-            write!(
-                buffer,
-                "* `<{}>`",
-                pos_arg.get_id().to_string().to_ascii_uppercase()
-            )?;
-
-            if let Some(help) = pos_arg.get_help() {
-                writeln!(buffer, " — {help}")?;
-            } else {
-                writeln!(buffer)?;
-            }
+            write_arg_markdown(buffer, pos_arg)?;
         }
 
         write!(buffer, "\n")?;
@@ -373,23 +311,7 @@ fn build_command_markdown(
         writeln!(buffer, "###### **Options:**\n")?;
 
         for arg in non_pos {
-            // Markdown list item
-            write!(buffer, "* ")?;
-
-            match (arg.get_short(), arg.get_long()) {
-                (Some(short), Some(long)) => {
-                    write!(buffer, "`-{}`, `--{}`", short, long)?
-                },
-                (Some(short), None) => write!(buffer, "`-{}`", short)?,
-                (None, Some(long)) => write!(buffer, "`--{}`", long)?,
-                (None, None) => {
-                    unreachable!("non-positional Arg with neither short nor long name: {arg:?}")
-                },
-            }
-
-            if let Some(help) = arg.get_help() {
-                writeln!(buffer, " — {}", help)?;
-            }
+            write_arg_markdown(buffer, arg)?;
         }
 
         write!(buffer, "\n")?;
@@ -410,6 +332,57 @@ fn build_command_markdown(
             subcommand,
             depth + 1,
         )?;
+    }
+
+    Ok(())
+}
+
+fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
+    // Markdown list item
+    write!(buffer, "* ")?;
+
+    match (arg.get_short(), arg.get_long()) {
+        (Some(short), Some(long)) => {
+            write!(buffer, "`-{}`, `--{}`", short, long)?
+        },
+        (Some(short), None) => write!(buffer, "`-{}`", short)?,
+        (None, Some(long)) => write!(buffer, "`--{}`", long)?,
+        (None, None) => {
+            debug_assert!(arg.is_positional(), "unexpected non-positional Arg with neither short nor long name: {arg:?}");
+
+            write!(
+                buffer,
+                "`<{}>`",
+                arg.get_id().to_string().to_ascii_uppercase()
+            )?;
+        },
+    }
+
+    if let Some(help) = arg.get_help() {
+        writeln!(buffer, " — {help}")?;
+    } else {
+        writeln!(buffer)?;
+    }
+
+    //--------------------
+    // Arg possible values
+    //--------------------
+
+    let possible_values: Vec<PossibleValue> = arg
+        .get_possible_values()
+        .into_iter()
+        .filter(|pv| !pv.is_hide_set())
+        .collect();
+
+    if !possible_values.is_empty() {
+        let text: String = possible_values
+            .iter()
+            // TODO: Show PossibleValue::get_help(), and PossibleValue::get_name_and_aliases().
+            .map(|pv| format!("`{}`", pv.get_name()))
+            .collect::<Vec<String>>()
+            .join(", ");
+
+        writeln!(buffer, "\n  *Possible Values:* {text}\n")?;
     }
 
     Ok(())
