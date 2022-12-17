@@ -11,7 +11,7 @@ An example command-line tool
 
 **Usage:** `complex-app [OPTIONS] [NAME] [COMMAND]`
 
-###### **Commands:**
+###### **Subcommands:**
 
 * `test` — does testing things
 

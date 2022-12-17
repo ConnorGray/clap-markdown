@@ -261,7 +261,7 @@ fn build_command_markdown(
     //----------------------------------
 
     if command.get_subcommands().next().is_some() {
-        writeln!(buffer, "###### **Commands:**\n")?;
+        writeln!(buffer, "###### **Subcommands:**\n")?;
 
         for subcommand in command.get_subcommands() {
             if subcommand.is_hide_set() {
