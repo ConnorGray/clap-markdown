@@ -57,7 +57,7 @@ fn write_help_markdown(buffer: &mut String, command: &clap::Command) {
 
     let title_name = match command.get_display_name() {
         Some(display_name) => display_name.to_owned(),
-        None => format!("`{}`", command.get_name())
+        None => format!("`{}`", command.get_name()),
     };
 
     writeln!(buffer, "# Command-Line Help for {title_name}\n").unwrap();
