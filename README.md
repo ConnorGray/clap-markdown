@@ -75,6 +75,20 @@ and viewed as online documentation.
 > Comitting `CommandLineHelp.md` to version control makes it easy to track
 > user-visible changes to the command-line interface.
 
+#### Projects using `clap-markdown`
+
+The following projects use `clap-markdown` to generate a `CommandLineHelp.md`
+reference document:
+
+* [`wolfram-app-discovery`](https://crates.io/crates/wolfram-app-discovery)
+  — [`CommandLineHelp.md`](https://github.com/WolframResearch/wolfram-app-discovery-rs/blob/master/docs/CommandLineHelp.md)
+* [`wolfram-cli`](https://github.com/ConnorGray/wolfram-cli)
+  — [`CommandLineHelp.md`](https://github.com/ConnorGray/wolfram-cli/blob/main/docs/CommandLineHelp.md)
+
+<small><i>
+To request the addition of a project to this list, please file an issue.
+</i></small>
+
 ## Compatibility with clap
 
 When this crate adds support for a new MAJOR version of `clap`, the MAJOR
