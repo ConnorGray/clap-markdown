@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * Added new [`./docs/examples/`](../docs/examples/) directory to the repository,
-  which Rust source code for the `complex_app.rs` example program, and the
+  with Rust source code for the `complex_app.rs` example program, and the
   generated `complex-app.md` Markdown content for that program. ([#1])
 
 ### Changed
