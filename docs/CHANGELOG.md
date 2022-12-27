@@ -10,6 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.1] - 2022-12-26
+
+### Added
+
+* Added new basic example to README.md. ([#4])
+
+* Added new 'Usage Convention: CommandLineHelp.md' section to README.md ([#4])
+
+* Add list of projects using `clap-markdown` and `CommandLineHelp.md` convention
+  to README.md. ([#5])
+
+
+
 ## [0.1.0] - 2022-12-17
 
 ### Added
@@ -44,7 +57,12 @@ Initial release of `clap-markdown`.
 <!-- v0.1.0 -->
 [#1]: https://github.com/ConnorGray/clap-markdown/pull/1
 
-[unreleased]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.0...HEAD
+<!-- v0.1.1 -->
+[#4]: https://github.com/ConnorGray/clap-markdown/pull/4
+[#5]: https://github.com/ConnorGray/clap-markdown/pull/5
 
+[unreleased]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.1...HEAD
+
+[0.1.1]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/ConnorGray/clap-markdown/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/ConnorGray/clap-markdown/releases/tag/v0.0.1
