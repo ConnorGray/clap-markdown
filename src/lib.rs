@@ -375,14 +375,45 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
         .collect();
 
     if !possible_values.is_empty() {
-        let text: String = possible_values
-            .iter()
-            // TODO: Show PossibleValue::get_help(), and PossibleValue::get_name_and_aliases().
-            .map(|pv| format!("`{}`", pv.get_name()))
-            .collect::<Vec<String>>()
-            .join(", ");
+        let any_have_help: bool =
+            possible_values.iter().any(|pv| pv.get_help().is_some());
 
-        writeln!(buffer, "\n  *Possible Values:* {text}\n")?;
+        if any_have_help {
+            // If any of the possible values have help text, print them
+            // as a separate item in a bulleted list, and include the
+            // help text for those that have it. E.g.:
+            //
+            //     Possible values:
+            //     - **value1**:
+            //       The help text
+            //     - **value2**
+            //     - **value3**:
+            //       The help text
+
+            let text: String = possible_values
+                .iter()
+                .map(|pv| match pv.get_help() {
+                    Some(help) => {
+                        format!("  - **{}**:\n    {}\n", pv.get_name(), help)
+                    },
+                    None => format!("  - **{}**\n", pv.get_name()),
+                })
+                .collect::<Vec<String>>()
+                .join("");
+
+            writeln!(buffer, "\n  Possible values:\n{text}")?;
+        } else {
+            // If none of the possible values have any documentation, print
+            // them all inline on a single line.
+            let text: String = possible_values
+                .iter()
+                // TODO: Show PossibleValue::get_help(), and PossibleValue::get_name_and_aliases().
+                .map(|pv| format!("`{}`", pv.get_name()))
+                .collect::<Vec<String>>()
+                .join(", ");
+
+            writeln!(buffer, "\n  *Possible Values:* {text}\n")?;
+        }
     }
 
     Ok(())
