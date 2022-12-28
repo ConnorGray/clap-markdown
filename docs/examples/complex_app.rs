@@ -13,8 +13,8 @@ pub struct Cli {
     #[arg(short, long, value_name = "FILE")]
     config: Option<PathBuf>,
 
-    #[arg(long)]
-    target: Option<Target>,
+    #[arg(long, default_value = "local")]
+    target: Target,
 
     /// Turn debugging information on
     #[arg(short, long, action = clap::ArgAction::Count)]
