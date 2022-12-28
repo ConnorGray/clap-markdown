@@ -68,7 +68,7 @@ and viewed as online documentation.
 3. Save `CommandLineHelp.md` in git, and link to it from the project's README.md
    or other relevant documentation.
 
-> For projects that have multiple associated commands, consider using the
+> For projects that have multiple associated executables, consider using the
 > command name as a suffix. For example: `CommandLineHelp-your-app.md`,
 > `CommandLineHelp-other-app.md`.
 
