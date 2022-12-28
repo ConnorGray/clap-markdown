@@ -37,6 +37,8 @@ enum Commands {
 #[derive(clap::ValueEnum)]
 #[derive(Clone)]
 enum Target {
+    /// Do the operation locally
     Local,
+    // Intentionally undocumented.
     Remote,
 }

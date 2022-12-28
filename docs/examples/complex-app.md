@@ -26,7 +26,10 @@ An example command-line tool
 * `-c`, `--config` — Sets a custom config file
 * `--target`
 
-  *Possible Values:* `local`, `remote`
+  Possible values:
+  - **local**:
+    Do the operation locally
+  - **remote**
 
 * `-d`, `--debug` — Turn debugging information on
 
