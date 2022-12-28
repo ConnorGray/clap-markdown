@@ -433,7 +433,7 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
                 .collect::<Vec<String>>()
                 .join(", ");
 
-            writeln!(buffer, "\n  *Possible Values:* {text}\n")?;
+            writeln!(buffer, "\n  Possible values: {text}\n")?;
         }
     }
 
