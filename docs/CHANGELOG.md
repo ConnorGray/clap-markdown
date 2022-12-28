@@ -10,6 +10,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.3] - 2022-12-28
+
+### Added
+
+* For arguments that take a value, the argument value name
+  ([`Arg::get_value_names()`](https://docs.rs/clap/4.0.32/clap/struct.Arg.html#method.get_value_names))
+  is now included in the generated Markdown. ([#11])
+
+* For arguments that have default values
+  ([`Arg::get_default_values](https://docs.rs/clap/4.0.32/clap/struct.Arg.html#method.get_default_values))
+  , those default values are mentioned in the generated Markdown. ([#11])
+
+### Changed
+
+* The rendered Markdown for
+  [`PossibleValue`](https://docs.rs/clap/4.0.32/clap/builder/struct.PossibleValue.html)
+  literal values now uses `code` styling instead of **emphasized** styling, for
+  consistency with other literally-what-the-user-types help content (e.g.
+  option or subcommand names). ([#11])
+
+
+
 ## [0.1.2] - 2022-12-28
 
 ### Added
@@ -80,8 +102,12 @@ Initial release of `clap-markdown`.
 <!-- v0.1.2 -->
 [#8]: https://github.com/ConnorGray/clap-markdown/pull/8
 
-[unreleased]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.2...HEAD
+<!-- v0.1.3 -->
+[#11]: https://github.com/ConnorGray/clap-markdown/pull/11
 
+[unreleased]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.3...HEAD
+
+[0.1.3]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/ConnorGray/clap-markdown/compare/v0.0.1...v0.1.0
