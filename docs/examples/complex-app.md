@@ -27,9 +27,9 @@ An example command-line tool
 * `--target`
 
   Possible values:
-  - **local**:
+  - `local`:
     Do the operation locally
-  - **remote**
+  - `remote`
 
 * `-d`, `--debug` — Turn debugging information on
 

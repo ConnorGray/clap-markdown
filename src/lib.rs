@@ -384,19 +384,19 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
             // help text for those that have it. E.g.:
             //
             //     Possible values:
-            //     - **value1**:
+            //     - `value1`:
             //       The help text
-            //     - **value2**
-            //     - **value3**:
+            //     - `value2`
+            //     - `value3`:
             //       The help text
 
             let text: String = possible_values
                 .iter()
                 .map(|pv| match pv.get_help() {
                     Some(help) => {
-                        format!("  - **{}**:\n    {}\n", pv.get_name(), help)
+                        format!("  - `{}`:\n    {}\n", pv.get_name(), help)
                     },
-                    None => format!("  - **{}**\n", pv.get_name()),
+                    None => format!("  - `{}`\n", pv.get_name()),
                 })
                 .collect::<Vec<String>>()
                 .join("");
