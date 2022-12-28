@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is now included in the generated Markdown. ([#11])
 
 * For arguments that have default values
-  ([`Arg::get_default_values](https://docs.rs/clap/4.0.32/clap/struct.Arg.html#method.get_default_values))
+  ([`Arg::get_default_values()`](https://docs.rs/clap/4.0.32/clap/struct.Arg.html#method.get_default_values))
   , those default values are mentioned in the generated Markdown. ([#11])
 
 ### Changed
