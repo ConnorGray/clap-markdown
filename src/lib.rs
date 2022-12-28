@@ -386,6 +386,27 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
     }
 
     //--------------------
+    // Arg default values
+    //--------------------
+
+    if !arg.get_default_values().is_empty() {
+        let default_values: String = arg
+            .get_default_values()
+            .iter()
+            .map(|value| format!("`{}`", value.to_string_lossy()))
+            .collect::<Vec<String>>()
+            .join(", ");
+
+        if arg.get_default_values().len() > 1 {
+            // Plural
+            writeln!(buffer, "\n  Default values: {default_values}")?;
+        } else {
+            // Singular
+            writeln!(buffer, "\n  Default value: {default_values}")?;
+        }
+    }
+
+    //--------------------
     // Arg possible values
     //--------------------
 

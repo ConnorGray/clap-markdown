@@ -26,6 +26,8 @@ An example command-line tool
 * `-c`, `--config <FILE>` — Sets a custom config file
 * `--target <TARGET>`
 
+  Default value: `local`
+
   Possible values:
   - `local`:
     Do the operation locally
