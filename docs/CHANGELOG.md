@@ -10,6 +10,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.2] - 2022-12-28
+
+### Added
+
+* Generated markdown for
+  [`PossibleValue`](https://docs.rs/clap/4.0.32/clap/builder/struct.PossibleValue.html)
+  values will now include the
+  [`PossibleValue::get_help()`](https://docs.rs/clap/4.0.32/clap/builder/struct.PossibleValue.html#method.get_help)
+  content, if it exists. ([#8])
+
+  This means that documentation comments present on enum variants that use
+  `#[derive(clap::ValueEnum)]` will be summarized in the generated Markdown
+  documentation.
+
+
+
 ## [0.1.1] - 2022-12-26
 
 ### Added
@@ -61,8 +77,12 @@ Initial release of `clap-markdown`.
 [#4]: https://github.com/ConnorGray/clap-markdown/pull/4
 [#5]: https://github.com/ConnorGray/clap-markdown/pull/5
 
-[unreleased]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.1...HEAD
+<!-- v0.1.2 -->
+[#8]: https://github.com/ConnorGray/clap-markdown/pull/8
 
+[unreleased]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.2...HEAD
+
+[0.1.2]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/ConnorGray/clap-markdown/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/ConnorGray/clap-markdown/releases/tag/v0.0.1
