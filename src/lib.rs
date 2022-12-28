@@ -341,20 +341,41 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
     // Markdown list item
     write!(buffer, "* ")?;
 
+    let value_name: String = match arg.get_value_names() {
+        // TODO: What if multiple names are provided?
+        Some([name, ..]) => name.as_str().to_owned(),
+        Some([]) => unreachable!(
+            "clap Arg::get_value_names() returned Some(..) of empty list"
+        ),
+        None => arg.get_id().to_string().to_ascii_uppercase(),
+    };
+
     match (arg.get_short(), arg.get_long()) {
         (Some(short), Some(long)) => {
-            write!(buffer, "`-{}`, `--{}`", short, long)?
+            if arg.get_action().takes_values() {
+                write!(buffer, "`-{short}`, `--{long} <{value_name}>`")?
+            } else {
+                write!(buffer, "`-{short}`, `--{long}`")?
+            }
         },
-        (Some(short), None) => write!(buffer, "`-{}`", short)?,
-        (None, Some(long)) => write!(buffer, "`--{}`", long)?,
+        (Some(short), None) => {
+            if arg.get_action().takes_values() {
+                write!(buffer, "`-{short} <{value_name}>`")?
+            } else {
+                write!(buffer, "`-{short}`")?
+            }
+        },
+        (None, Some(long)) => {
+            if arg.get_action().takes_values() {
+                write!(buffer, "`--{} <{value_name}>`", long)?
+            } else {
+                write!(buffer, "`--{}`", long)?
+            }
+        },
         (None, None) => {
             debug_assert!(arg.is_positional(), "unexpected non-positional Arg with neither short nor long name: {arg:?}");
 
-            write!(
-                buffer,
-                "`<{}>`",
-                arg.get_id().to_string().to_ascii_uppercase()
-            )?;
+            write!(buffer, "`<{value_name}>`",)?;
         },
     }
 

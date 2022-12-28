@@ -23,8 +23,8 @@ An example command-line tool
 
 ###### **Options:**
 
-* `-c`, `--config` — Sets a custom config file
-* `--target`
+* `-c`, `--config <FILE>` — Sets a custom config file
+* `--target <TARGET>`
 
   Possible values:
   - `local`:
