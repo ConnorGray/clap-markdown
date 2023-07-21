@@ -136,7 +136,7 @@ fn write_help_markdown(
     writeln!(
         buffer,
         "This document contains the help content for the `{}` command-line program.\n",
-        command.get_name()
+        command.get_display_name().unwrap_or_else(|| command.get_name())
     ).unwrap();
 
     //----------------------------------
@@ -189,7 +189,12 @@ fn build_table_of_contents_markdown(
     // Append the name of `command` to `command_path`.
     let command_path = {
         let mut command_path = parent_command_path;
-        command_path.push(command.get_name().to_owned());
+        command_path.push(
+            command
+                .get_display_name()
+                .unwrap_or_else(|| command.get_name())
+                .to_owned(),
+        );
         command_path
     };
 
@@ -277,7 +282,12 @@ fn build_command_markdown(
     // Append the name of `command` to `command_path`.
     let command_path = {
         let mut command_path = parent_command_path.clone();
-        command_path.push(command.get_name().to_owned());
+        command_path.push(
+            command
+                .get_display_name()
+                .unwrap_or_else(|| command.get_name())
+                .to_owned(),
+        );
         command_path
     };
 
@@ -353,7 +363,9 @@ fn build_command_markdown(
             writeln!(
                 buffer,
                 "* `{}` — {}",
-                subcommand.get_name(),
+                subcommand
+                    .get_display_name()
+                    .unwrap_or_else(|| subcommand.get_name()),
                 match subcommand.get_about() {
                     Some(about) => about.to_string(),
                     None => String::new(),
