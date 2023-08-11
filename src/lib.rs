@@ -12,7 +12,6 @@ mod test_readme {
     #![doc = include_str!("../README.md")]
 }
 
-
 use std::fmt::{self, Write};
 
 use clap::builder::PossibleValue;
@@ -338,6 +337,11 @@ fn build_command_markdown(
 }
 
 fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
+    // Don't document commands marked with `clap(hide = true)`.
+    if arg.is_hide_set() {
+        return Ok(());
+    }
+
     // Markdown list item
     write!(buffer, "* ")?;
 
