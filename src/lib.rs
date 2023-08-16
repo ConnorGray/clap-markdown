@@ -384,9 +384,9 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
     }
 
     if let Some(help) = arg.get_help() {
-        writeln!(buffer, " — {help}")?;
+        writeln!(buffer, " — {help}\n")?;
     } else {
-        writeln!(buffer)?;
+        writeln!(buffer, "\n")?;
     }
 
     //--------------------
@@ -403,10 +403,10 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
 
         if arg.get_default_values().len() > 1 {
             // Plural
-            writeln!(buffer, "\n  Default values: {default_values}")?;
+            writeln!(buffer, "\n  Default values: {default_values}\n")?;
         } else {
             // Singular
-            writeln!(buffer, "\n  Default value: {default_values}")?;
+            writeln!(buffer, "\n  Default value: {default_values}\n")?;
         }
     }
 
@@ -461,6 +461,8 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
             writeln!(buffer, "\n  Possible values: {text}\n")?;
         }
     }
+
+    writeln!(buffer, "  &nbsp;\n")?;
 
     Ok(())
 }
