@@ -80,17 +80,24 @@ fn build_table_of_contents_markdown(
         return Ok(());
     }
 
+    let command_name = command
+        .get_bin_name()
+        .or(Some(command.get_name()))
+        .unwrap()
+        .to_owned();
+
     // Append the name of `command` to `command_path`.
     let command_path = {
         let mut command_path = parent_command_path;
-        command_path.push(command.get_name().to_owned());
+        command_path.push(command_name.clone());
         command_path
     };
 
     writeln!(
         buffer,
-        "* [{}](#{})",
-        command_path.join(" "),
+        "{}* [{}](#{})",
+        "  ".repeat(depth),
+        command_name,
         command_path.join("-"),
     )?;
 
@@ -110,51 +117,6 @@ fn build_table_of_contents_markdown(
     Ok(())
 }
 
-/*
-fn build_table_of_contents_html(
-    buffer: &mut String,
-    // Parent commands of `command`.
-    parent_command_path: Vec<String>,
-    command: &clap::Command,
-    depth: usize,
-) -> std::fmt::Result {
-    // Don't document commands marked with `clap(hide = true)` (which includes
-    // `print-all-help`).
-    if command.is_hide_set() {
-        return Ok(());
-    }
-
-    // Append the name of `command` to `command_path`.
-    let command_path = {
-        let mut command_path = parent_command_path;
-        command_path.push(command.get_name().to_owned());
-        command_path
-    };
-
-    writeln!(
-        buffer,
-        "<li><a href=\"#{}\"><code>{}</code>↴</a></li>",
-        command_path.join("-"),
-        command_path.join(" ")
-    )?;
-
-    //----------------------------------
-    // Recurse to write subcommands
-    //----------------------------------
-
-    for subcommand in command.get_subcommands() {
-        build_table_of_contents_html(
-            buffer,
-            command_path.clone(),
-            subcommand,
-            depth + 1,
-        )?;
-    }
-
-    Ok(())
-}
-*/
-
 fn build_command_markdown(
     buffer: &mut String,
     // Parent commands of `command`.
@@ -171,7 +133,13 @@ fn build_command_markdown(
     // Append the name of `command` to `command_path`.
     let command_path = {
         let mut command_path = parent_command_path.clone();
-        command_path.push(command.get_name().to_owned());
+        command_path.push(
+            command
+                .get_bin_name()
+                .or(Some(command.get_name()))
+                .unwrap()
+                .to_owned(),
+        );
         command_path
     };
 
@@ -191,9 +159,9 @@ fn build_command_markdown(
 
     writeln!(
         buffer,
-        "{} `{}`\n",
+        "{} {}\n",
         // "#".repeat(depth + 1),
-        "##",
+        "#",
         command_path.join(" "),
     )?;
 
