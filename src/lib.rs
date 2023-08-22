@@ -51,29 +51,8 @@ pub fn print_help_markdown<C: clap::CommandFactory>() {
 
 fn write_help_markdown(buffer: &mut String, command: &clap::Command) {
     //----------------------------------
-    // Write the document title
-    //----------------------------------
-
-    let title_name = match command.get_display_name() {
-        Some(display_name) => display_name.to_owned(),
-        None => format!("`{}`", command.get_name()),
-    };
-
-    writeln!(buffer, "# Command-Line Help for {title_name}\n").unwrap();
-
-    writeln!(
-        buffer,
-        "This document contains the help content for the `{}` command-line program.\n",
-        command.get_name()
-    ).unwrap();
-
-    //----------------------------------
     // Write the table of contents
     //----------------------------------
-
-    // writeln!(buffer, r#"<div style="background: light-gray"><ul>"#).unwrap();
-    // build_table_of_contents_html(buffer, Vec::new(), command, 0).unwrap();
-    // writeln!(buffer, "</ul></div>").unwrap();
 
     writeln!(buffer, "**Command Overview:**\n").unwrap();
 
@@ -86,18 +65,6 @@ fn write_help_markdown(buffer: &mut String, command: &clap::Command) {
     //----------------------------------------
 
     build_command_markdown(buffer, Vec::new(), command, 0).unwrap();
-
-    //-----------------
-    // Write the footer
-    //-----------------
-
-    write!(buffer, r#"<hr/>
-
-<small><i>
-    This document was generated automatically by
-    <a href="https://crates.io/crates/clap-markdown"><code>clap-markdown</code></a>.
-</i></small>
-"#).unwrap();
 }
 
 fn build_table_of_contents_markdown(
@@ -116,13 +83,13 @@ fn build_table_of_contents_markdown(
     // Append the name of `command` to `command_path`.
     let command_path = {
         let mut command_path = parent_command_path;
-        command_path.push(command.get_name().to_owned());
+        command_path.push(command.get_bin_name().unwrap().to_owned());
         command_path
     };
 
     writeln!(
         buffer,
-        "* [`{}`↴](#{})",
+        "* [{}](#{})",
         command_path.join(" "),
         command_path.join("-"),
     )?;
