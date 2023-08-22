@@ -83,7 +83,7 @@ fn build_table_of_contents_markdown(
     // Append the name of `command` to `command_path`.
     let command_path = {
         let mut command_path = parent_command_path;
-        command_path.push(command.get_bin_name().unwrap().to_owned());
+        command_path.push(command.get_name().to_owned());
         command_path
     };
 
