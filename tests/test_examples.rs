@@ -19,6 +19,7 @@ fn test_example_complex_app() {
             &MarkdownOptions::new()
                 .title(format!("Some Custom Title for Complex App"))
                 .show_footer(false)
+                .show_table_of_contents(false)
         ),
         include_str!("../docs/examples/complex-app-custom.md"),
         "Mismatch testing CUSTOM Markdown output"

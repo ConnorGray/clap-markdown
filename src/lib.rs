@@ -27,6 +27,7 @@ use clap::builder::PossibleValue;
 pub struct MarkdownOptions {
     title: Option<String>,
     show_footer: bool,
+    show_table_of_contents: bool,
 }
 
 impl MarkdownOptions {
@@ -35,6 +36,7 @@ impl MarkdownOptions {
         return Self {
             title: None,
             show_footer: true,
+            show_table_of_contents: true,
         };
     }
 
@@ -48,6 +50,13 @@ impl MarkdownOptions {
     /// Whether to show the default footer advertising `clap-markdown`.
     pub fn show_footer(mut self, show: bool) -> Self {
         self.show_footer = show;
+
+        return self;
+    }
+
+    /// Whether to show the default table of contents.
+    pub fn show_table_of_contents(mut self, show: bool) -> Self {
+        self.show_table_of_contents = show;
 
         return self;
     }
@@ -123,8 +132,11 @@ fn write_help_markdown(
     //----------------------------------
 
     let title_name = match command.get_display_name() {
-        Some(display_name) => display_name.to_owned(),
-        None => format!("`{}`", command.get_name()),
+        Some(bin_name) => bin_name.to_owned(),
+        None => command
+            .get_bin_name()
+            .unwrap_or_else(|| command.get_name())
+            .to_owned(),
     };
 
     let title = match options.title {
@@ -136,7 +148,7 @@ fn write_help_markdown(
     writeln!(
         buffer,
         "This document contains the help content for the `{}` command-line program.\n",
-        command.get_display_name().unwrap_or_else(|| command.get_name())
+        title_name
     ).unwrap();
 
     //----------------------------------
@@ -147,11 +159,14 @@ fn write_help_markdown(
     // build_table_of_contents_html(buffer, Vec::new(), command, 0).unwrap();
     // writeln!(buffer, "</ul></div>").unwrap();
 
-    writeln!(buffer, "**Command Overview:**\n").unwrap();
+    if options.show_table_of_contents {
+        writeln!(buffer, "**Command Overview:**\n").unwrap();
 
-    build_table_of_contents_markdown(buffer, Vec::new(), command, 0).unwrap();
+        build_table_of_contents_markdown(buffer, Vec::new(), command, 0)
+            .unwrap();
 
-    write!(buffer, "\n").unwrap();
+        write!(buffer, "\n").unwrap();
+    }
 
     //----------------------------------------
     // Write the commands/subcommands sections
@@ -186,15 +201,17 @@ fn build_table_of_contents_markdown(
         return Ok(());
     }
 
+    let title_name = command
+        .get_display_name()
+        .unwrap_or_else(|| {
+            command.get_bin_name().unwrap_or_else(|| command.get_name())
+        })
+        .to_owned();
+
     // Append the name of `command` to `command_path`.
     let command_path = {
         let mut command_path = parent_command_path;
-        command_path.push(
-            command
-                .get_display_name()
-                .unwrap_or_else(|| command.get_name())
-                .to_owned(),
-        );
+        command_path.push(title_name);
         command_path
     };
 
@@ -279,15 +296,17 @@ fn build_command_markdown(
         return Ok(());
     }
 
+    let title_name = command
+        .get_display_name()
+        .unwrap_or_else(|| {
+            command.get_bin_name().unwrap_or_else(|| command.get_name())
+        })
+        .to_owned();
+
     // Append the name of `command` to `command_path`.
     let command_path = {
         let mut command_path = parent_command_path.clone();
-        command_path.push(
-            command
-                .get_display_name()
-                .unwrap_or_else(|| command.get_name())
-                .to_owned(),
-        );
+        command_path.push(title_name);
         command_path
     };
 
@@ -360,17 +379,19 @@ fn build_command_markdown(
                 continue;
             }
 
-            writeln!(
-                buffer,
-                "* `{}` — {}",
-                subcommand
-                    .get_display_name()
-                    .unwrap_or_else(|| subcommand.get_name()),
-                match subcommand.get_about() {
-                    Some(about) => about.to_string(),
-                    None => String::new(),
-                }
-            )?;
+            let title_name = subcommand
+                .get_display_name()
+                .unwrap_or_else(|| {
+                    command.get_bin_name().unwrap_or_else(|| command.get_name())
+                })
+                .to_owned();
+
+            writeln!(buffer, "* `{}` — {}", title_name, match subcommand
+                .get_about()
+            {
+                Some(about) => about.to_string(),
+                None => String::new(),
+            })?;
         }
 
         write!(buffer, "\n")?;
