@@ -27,7 +27,7 @@ pub fn help_markdown<C: clap::CommandFactory>() -> String {
 pub fn help_markdown_command(command: &clap::Command) -> String {
     let mut buffer = String::with_capacity(100);
 
-    write_help_markdown(&mut buffer, command);
+    write_help_markdown(&mut buffer, command, None);
 
     buffer
 }
@@ -39,24 +39,31 @@ pub fn help_markdown_command(command: &clap::Command) -> String {
 /// Format the help information for `command` as Markdown and print it.
 ///
 /// Output is printed to the standard output, using [`println!`].
-pub fn print_help_markdown<C: clap::CommandFactory>() {
+pub fn print_help_markdown<C: clap::CommandFactory>(disable_toc: Option<bool>) {
     let command = C::command();
 
     let mut buffer = String::with_capacity(100);
 
-    write_help_markdown(&mut buffer, &command);
+    write_help_markdown(&mut buffer, &command, disable_toc);
 
     println!("{}", buffer);
 }
 
-fn write_help_markdown(buffer: &mut String, command: &clap::Command) {
+fn write_help_markdown(
+    buffer: &mut String,
+    command: &clap::Command,
+    disable_toc: Option<bool>,
+) {
     //----------------------------------
     // Write the document title
     //----------------------------------
 
     let title_name = match command.get_display_name() {
-        Some(display_name) => display_name.to_owned(),
-        None => format!("`{}`", command.get_name()),
+        Some(bin_name) => bin_name.to_owned(),
+        None => command
+            .get_bin_name()
+            .unwrap_or_else(|| command.get_name())
+            .to_owned(),
     };
 
     writeln!(buffer, "# Command-Line Help for {title_name}\n").unwrap();
@@ -64,7 +71,7 @@ fn write_help_markdown(buffer: &mut String, command: &clap::Command) {
     writeln!(
         buffer,
         "This document contains the help content for the `{}` command-line program.\n",
-        command.get_display_name().unwrap_or_else(|| command.get_name())
+        title_name
     ).unwrap();
 
     //----------------------------------
@@ -75,11 +82,14 @@ fn write_help_markdown(buffer: &mut String, command: &clap::Command) {
     // build_table_of_contents_html(buffer, Vec::new(), command, 0).unwrap();
     // writeln!(buffer, "</ul></div>").unwrap();
 
-    writeln!(buffer, "**Command Overview:**\n").unwrap();
+    if let None = disable_toc {
+        writeln!(buffer, "**Command Overview:**\n").unwrap();
 
-    build_table_of_contents_markdown(buffer, Vec::new(), command, 0).unwrap();
+        build_table_of_contents_markdown(buffer, Vec::new(), command, 0)
+            .unwrap();
 
-    write!(buffer, "\n").unwrap();
+        write!(buffer, "\n").unwrap();
+    }
 
     //----------------------------------------
     // Write the commands/subcommands sections
@@ -113,15 +123,17 @@ fn build_table_of_contents_markdown(
         return Ok(());
     }
 
+    let title_name = command
+        .get_display_name()
+        .unwrap_or_else(|| {
+            command.get_bin_name().unwrap_or_else(|| command.get_name())
+        })
+        .to_owned();
+
     // Append the name of `command` to `command_path`.
     let command_path = {
         let mut command_path = parent_command_path;
-        command_path.push(
-            command
-                .get_display_name()
-                .unwrap_or_else(|| command.get_name())
-                .to_owned(),
-        );
+        command_path.push(title_name);
         command_path
     };
 
@@ -206,15 +218,17 @@ fn build_command_markdown(
         return Ok(());
     }
 
+    let title_name = command
+        .get_display_name()
+        .unwrap_or_else(|| {
+            command.get_bin_name().unwrap_or_else(|| command.get_name())
+        })
+        .to_owned();
+
     // Append the name of `command` to `command_path`.
     let command_path = {
         let mut command_path = parent_command_path.clone();
-        command_path.push(
-            command
-                .get_display_name()
-                .unwrap_or_else(|| command.get_name())
-                .to_owned(),
-        );
+        command_path.push(title_name);
         command_path
     };
 
@@ -279,12 +293,17 @@ fn build_command_markdown(
                 continue;
             }
 
+            let title_name = subcommand
+                .get_display_name()
+                .unwrap_or_else(|| {
+                    command.get_bin_name().unwrap_or_else(|| command.get_name())
+                })
+                .to_owned();
+
             writeln!(
                 buffer,
                 "* `{}` — {}",
-                subcommand
-                    .get_display_name()
-                    .unwrap_or_else(|| subcommand.get_name()),
+                title_name,
                 match subcommand.get_about() {
                     Some(about) => about.to_string(),
                     None => String::new(),
