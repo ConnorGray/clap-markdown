@@ -58,13 +58,7 @@ fn write_help_markdown(
     // Write the document title
     //----------------------------------
 
-    let title_name = match command.get_display_name() {
-        Some(bin_name) => bin_name.to_owned(),
-        None => command
-            .get_bin_name()
-            .unwrap_or_else(|| command.get_name())
-            .to_owned(),
-    };
+    let title_name = get_canonical_name(command);
 
     writeln!(buffer, "# Command-Line Help for {title_name}\n").unwrap();
 
@@ -110,6 +104,19 @@ fn write_help_markdown(
 "#).unwrap();
 }
 
+// This is a utility function to get the canonical name of a command. It's logic is
+// to get the display name if it exists, otherwise get the bin name if it exists, otherwise
+// get the package name.
+fn get_canonical_name(command: &clap::Command) -> String {
+    return match command.get_display_name() {
+        Some(bin_name) => bin_name.to_owned(),
+        None => command
+            .get_bin_name()
+            .unwrap_or_else(|| command.get_name())
+            .to_owned(),
+    };
+}
+
 fn build_table_of_contents_markdown(
     buffer: &mut String,
     // Parent commands of `command`.
@@ -123,12 +130,7 @@ fn build_table_of_contents_markdown(
         return Ok(());
     }
 
-    let title_name = command
-        .get_display_name()
-        .unwrap_or_else(|| {
-            command.get_bin_name().unwrap_or_else(|| command.get_name())
-        })
-        .to_owned();
+    let title_name = get_canonical_name(command);
 
     // Append the name of `command` to `command_path`.
     let command_path = {
@@ -218,12 +220,7 @@ fn build_command_markdown(
         return Ok(());
     }
 
-    let title_name = command
-        .get_display_name()
-        .unwrap_or_else(|| {
-            command.get_bin_name().unwrap_or_else(|| command.get_name())
-        })
-        .to_owned();
+    let title_name = get_canonical_name(command);
 
     // Append the name of `command` to `command_path`.
     let command_path = {
@@ -293,12 +290,7 @@ fn build_command_markdown(
                 continue;
             }
 
-            let title_name = subcommand
-                .get_display_name()
-                .unwrap_or_else(|| {
-                    command.get_bin_name().unwrap_or_else(|| command.get_name())
-                })
-                .to_owned();
+            let title_name = get_canonical_name(subcommand);
 
             writeln!(
                 buffer,
