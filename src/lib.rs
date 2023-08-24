@@ -104,19 +104,6 @@ fn write_help_markdown(
 "#).unwrap();
 }
 
-// This is a utility function to get the canonical name of a command. It's logic is
-// to get the display name if it exists, otherwise get the bin name if it exists, otherwise
-// get the package name.
-fn get_canonical_name(command: &clap::Command) -> String {
-    return match command.get_display_name() {
-        Some(bin_name) => bin_name.to_owned(),
-        None => command
-            .get_bin_name()
-            .unwrap_or_else(|| command.get_name())
-            .to_owned(),
-    };
-}
-
 fn build_table_of_contents_markdown(
     buffer: &mut String,
     // Parent commands of `command`.
@@ -481,4 +468,17 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
     }
 
     Ok(())
+}
+
+// This is a utility function to get the canonical name of a command. It's logic is
+// to get the display name if it exists, otherwise get the bin name if it exists, otherwise
+// get the package name.
+fn get_canonical_name(command: &clap::Command) -> String {
+    return match command.get_display_name() {
+        Some(bin_name) => bin_name.to_owned(),
+        None => command
+            .get_bin_name()
+            .unwrap_or_else(|| command.get_name())
+            .to_owned(),
+    };
 }
