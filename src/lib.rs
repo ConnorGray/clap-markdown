@@ -474,11 +474,9 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
 // to get the display name if it exists, otherwise get the bin name if it exists, otherwise
 // get the package name.
 fn get_canonical_name(command: &clap::Command) -> String {
-    return match command.get_display_name() {
-        Some(bin_name) => bin_name.to_owned(),
-        None => command
-            .get_bin_name()
-            .unwrap_or_else(|| command.get_name())
-            .to_owned(),
-    };
+    command
+        .get_display_name()
+        .or_else(|| command.get_bin_name())
+        .map(|name| name.to_owned())
+        .unwrap_or_else(|| command.get_name().to_owned())
 }
