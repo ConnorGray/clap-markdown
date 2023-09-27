@@ -161,7 +161,7 @@ fn build_command_markdown(
         buffer,
         "{} {}\n",
         // "#".repeat(depth + 1),
-        "#",
+        "###",
         command_path.join(" "),
     )?;
 
@@ -197,7 +197,7 @@ fn build_command_markdown(
     //----------------------------------
 
     if command.get_subcommands().next().is_some() {
-        writeln!(buffer, "###### **Subcommands:**\n")?;
+        writeln!(buffer, "#### **Subcommands:**\n")?;
 
         for subcommand in command.get_subcommands() {
             if subcommand.is_hide_set() {
@@ -223,7 +223,7 @@ fn build_command_markdown(
     //----------------------------------
 
     if command.get_positionals().next().is_some() {
-        writeln!(buffer, "###### **Arguments:**\n")?;
+        writeln!(buffer, "#### **Arguments:**\n")?;
 
         for pos_arg in command.get_positionals() {
             write_arg_markdown(buffer, pos_arg)?;
@@ -242,7 +242,7 @@ fn build_command_markdown(
         .collect();
 
     if !non_pos.is_empty() {
-        writeln!(buffer, "###### **Options:**\n")?;
+        writeln!(buffer, "#### **Options:**\n")?;
 
         for arg in non_pos {
             write_arg_markdown(buffer, arg)?;
