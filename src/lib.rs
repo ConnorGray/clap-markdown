@@ -12,8 +12,10 @@ mod test_readme {
     #![doc = include_str!("../README.md")]
 }
 
-
-use std::fmt::{self, Write};
+use std::{
+    default,
+    fmt::{self, Write},
+};
 
 use clap::builder::PossibleValue;
 
@@ -24,11 +26,24 @@ pub fn help_markdown<C: clap::CommandFactory>() -> String {
     help_markdown_command(&command)
 }
 
+/// Format the help information for `command` as Markdown, with custom options.
+pub fn custom_help_markdown<C: clap::CommandFactory>(
+    options: MarkdownOptions,
+) -> String {
+    let command = C::command();
+
+    let mut buffer = String::with_capacity(100);
+
+    write_help_markdown(&mut buffer, &command, options);
+
+    buffer
+}
+
 /// Format the help information for `command` as Markdown.
 pub fn help_markdown_command(command: &clap::Command) -> String {
     let mut buffer = String::with_capacity(100);
 
-    write_help_markdown(&mut buffer, command);
+    write_help_markdown(&mut buffer, command, default::Default::default());
 
     buffer
 }
@@ -45,12 +60,21 @@ pub fn print_help_markdown<C: clap::CommandFactory>() {
 
     let mut buffer = String::with_capacity(100);
 
-    write_help_markdown(&mut buffer, &command);
+    write_help_markdown(&mut buffer, &command, default::Default::default());
 
     println!("{}", buffer);
 }
 
-fn write_help_markdown(buffer: &mut String, command: &clap::Command) {
+#[derive(Default)]
+pub struct MarkdownOptions {
+    pub title: Option<String>,
+}
+
+fn write_help_markdown(
+    buffer: &mut String,
+    command: &clap::Command,
+    options: MarkdownOptions,
+) {
     //----------------------------------
     // Write the document title
     //----------------------------------
@@ -60,7 +84,11 @@ fn write_help_markdown(buffer: &mut String, command: &clap::Command) {
         None => format!("`{}`", command.get_name()),
     };
 
-    writeln!(buffer, "# Command-Line Help for {title_name}\n").unwrap();
+    let title = match options.title {
+        Some(ref title) => title.to_owned(),
+        None => format!("Command-Line Help for {title_name}"),
+    };
+    writeln!(buffer, "# {title}\n",).unwrap();
 
     writeln!(
         buffer,
