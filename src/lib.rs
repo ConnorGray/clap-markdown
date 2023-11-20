@@ -68,6 +68,7 @@ pub fn print_help_markdown<C: clap::CommandFactory>() {
 #[derive(Default)]
 pub struct MarkdownOptions {
     pub title: Option<String>,
+    pub hide_footer: bool,
 }
 
 fn write_help_markdown(
@@ -119,14 +120,15 @@ fn write_help_markdown(
     //-----------------
     // Write the footer
     //-----------------
-
-    write!(buffer, r#"<hr/>
+    if !options.hide_footer {
+        write!(buffer, r#"<hr/>
 
 <small><i>
     This document was generated automatically by
     <a href="https://crates.io/crates/clap-markdown"><code>clap-markdown</code></a>.
 </i></small>
 "#).unwrap();
+    }
 }
 
 fn build_table_of_contents_markdown(
