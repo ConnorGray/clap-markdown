@@ -20,6 +20,9 @@ pub struct Cli {
     #[arg(short, long, action = clap::ArgAction::Count)]
     debug: u8,
 
+    #[arg(short, long, hide = true)]
+    secret_arg: bool,
+
     #[command(subcommand)]
     command: Option<Commands>,
 }
@@ -31,6 +34,11 @@ enum Commands {
         /// lists test values
         #[arg(short, long)]
         list: bool,
+    },
+    /// Demo that `Options` is not printed if all options are hidden
+    OnlyHiddenOptions {
+        #[arg(short, long, hide = true)]
+        secret: bool,
     },
 }
 
