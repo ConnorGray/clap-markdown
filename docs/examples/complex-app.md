@@ -47,9 +47,6 @@ does testing things
 
 * `-l`, `--list` — lists test values
 
-  Possible values: `true`, `false`
-
-
 
 
 <hr/>

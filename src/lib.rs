@@ -416,7 +416,11 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
         .filter(|pv| !pv.is_hide_set())
         .collect();
 
-    if !possible_values.is_empty() {
+    // Print possible values for options that take a value, but not for flags
+    // that can only be either present or absent and do not take a value.
+    if !possible_values.is_empty()
+        && !matches!(arg.get_action(), clap::ArgAction::SetTrue)
+    {
         let any_have_help: bool =
             possible_values.iter().any(|pv| pv.get_help().is_some());
 
