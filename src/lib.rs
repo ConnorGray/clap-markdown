@@ -379,8 +379,11 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
         },
     }
 
-    if let Some(help) = arg.get_help() {
-        writeln!(buffer, " — {help}")?;
+    if let Some(help) = arg.get_long_help() {
+        // TODO: Parse formatting in the string
+        buffer.push_str(&indent(&help.to_string(), " — ", "   "))
+    } else if let Some(short_help) = arg.get_help() {
+        writeln!(buffer, " — {short_help}")?;
     } else {
         writeln!(buffer)?;
     }
@@ -463,4 +466,45 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
     }
 
     Ok(())
+}
+
+/// Indents non-empty lines. The output always ends with a newline.
+fn indent(s: &str, first: &str, rest: &str) -> String {
+    if s.is_empty() {
+        // For consistency. It's easiest to always add a newline at the end, and
+        // there's little reason not to.
+        return "\n".to_string();
+    }
+    let mut result = String::new();
+    let mut first_line = true;
+
+    for line in s.lines() {
+        if !line.is_empty() {
+            result.push_str(if first_line { first } else { rest });
+            result.push_str(line);
+            first_line = false;
+        }
+        result.push('\n');
+    }
+    result
+}
+
+#[cfg(test)]
+mod test {
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test_indent() {
+        use super::indent;
+        assert_eq!(
+            &indent("Header\n\nMore info", "___", "~~~~"),
+            "___Header\n\n~~~~More info\n"
+        );
+        assert_eq!(
+            &indent("Header\n\nMore info\n", "___", "~~~~"),
+            &indent("Header\n\nMore info", "___", "~~~~"),
+        );
+        assert_eq!(&indent("", "___", "~~~~"), "\n");
+        assert_eq!(&indent("\n", "___", "~~~~"), "\n");
+    }
 }

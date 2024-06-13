@@ -7,6 +7,8 @@ use clap::{Parser, Subcommand};
 #[command(name = "complex-app")]
 pub struct Cli {
     /// Optional name to operate on
+    ///
+    /// Longer description
     name: Option<String>,
 
     /// Sets a custom config file
@@ -17,6 +19,8 @@ pub struct Cli {
     target: Target,
 
     /// Turn debugging information on
+    ///
+    /// Repeat this option to see more and more debug information.
     #[arg(short, long, action = clap::ArgAction::Count)]
     debug: u8,
 
