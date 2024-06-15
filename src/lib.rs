@@ -365,12 +365,12 @@ fn build_command_markdown(
 
             let title_name = get_canonical_name(subcommand);
 
-            writeln!(buffer, "* `{}` — {}", title_name, match subcommand
-                .get_about()
-            {
+            let about = match subcommand.get_about() {
                 Some(about) => about.to_string(),
                 None => String::new(),
-            })?;
+            };
+
+            writeln!(buffer, "* `{title_name}` — {about}",)?;
         }
 
         write!(buffer, "\n")?;
