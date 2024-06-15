@@ -135,7 +135,7 @@ fn write_help_markdown(
 
     let title = match options.title {
         Some(ref title) => title.to_owned(),
-        None => format!("Command-Line Help for {title_name}"),
+        None => format!("Command-Line Help for `{title_name}`"),
     };
     writeln!(buffer, "# {title}\n",).unwrap();
 

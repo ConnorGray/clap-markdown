@@ -54,7 +54,7 @@ Options:
             &MarkdownOptions::new().show_footer(false)
         ),
         "\
-# Command-Line Help for my-program-display-name
+# Command-Line Help for `my-program-display-name`
 
 This document contains the help content for the `my-program-display-name` command-line program.
 
@@ -129,7 +129,7 @@ Options:
             &MarkdownOptions::new().show_footer(false)
         ),
         "\
-# Command-Line Help for my-program-display-name
+# Command-Line Help for `my-program-display-name`
 
 This document contains the help content for the `my-program-display-name` command-line program.
 

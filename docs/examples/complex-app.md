@@ -1,4 +1,4 @@
-# Command-Line Help for complex-app
+# Command-Line Help for `complex-app`
 
 This document contains the help content for the `complex-app` command-line program.
 
