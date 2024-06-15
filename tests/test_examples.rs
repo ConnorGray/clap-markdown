@@ -1,3 +1,4 @@
+use clap_markdown::MarkdownOptions;
 use pretty_assertions::assert_eq;
 
 #[test]
@@ -9,5 +10,15 @@ fn test_example_complex_app() {
     assert_eq!(
         clap_markdown::help_markdown::<complex_app::Cli>(),
         include_str!("../docs/examples/complex-app.md")
+    );
+
+    assert_eq!(
+        clap_markdown::help_markdown_custom::<complex_app::Cli>(
+            &MarkdownOptions::new()
+                .title(format!("Some Custom Title for Complex App"))
+                .show_footer(false)
+        ),
+        include_str!("../docs/examples/complex-app-custom.md"),
+        "Mismatch testing CUSTOM Markdown output"
     );
 }
