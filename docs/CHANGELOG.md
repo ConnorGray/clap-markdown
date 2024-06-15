@@ -18,6 +18,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Contents of the command title header.
   - Whether to show the footer explaining the documentation was generated with
     `clap-markdown`.
+  - Whether to show the command overview table of contents.
+
+### Changed
+
+* `clap-markdown` will now respect the `Command.display_name` property, if set,
+  and use it in the rendered Markdown when showing the name and usage of the
+  command.
+  ([#27],
+  co-authored-by [@keturiosakys](https://github.com/keturiosakys)
+  and [@hatchan](https://github.com/hatchan))
 
 
 
@@ -115,6 +125,9 @@ Initial release of `clap-markdown`.
 
 <!-- v0.1.3 -->
 [#11]: https://github.com/ConnorGray/clap-markdown/pull/11
+
+<!-- Unreleased -->
+[#27]: https://github.com/ConnorGray/clap-markdown/pull/27
 
 [unreleased]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.3...HEAD
 
