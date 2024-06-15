@@ -6,6 +6,7 @@ This document contains the help content for the `complex-app` command-line progr
 
 * [`complex-app`↴](#complex-app)
 * [`complex-app test`↴](#complex-app-test)
+* [`complex-app only-hidden-options`↴](#complex-app-only-hidden-options)
 
 ## `complex-app`
 
@@ -16,6 +17,7 @@ An example command-line tool
 ###### **Subcommands:**
 
 * `test` — does testing things
+* `only-hidden-options` — Demo that `Options` is not printed if all options are hidden
 
 ###### **Arguments:**
 
@@ -46,6 +48,14 @@ does testing things
 ###### **Options:**
 
 * `-l`, `--list` — lists test values
+
+
+
+## `complex-app only-hidden-options`
+
+Demo that `Options` is not printed if all options are hidden
+
+**Usage:** `complex-app only-hidden-options`
 
 
 
