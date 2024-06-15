@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+* Added `help_markdown_custom()` and `help_markdown_command_custom()`, for
+  customizing the built Markdown.
+
+  Supported customization options include:
+
+  - Contents of the command title header.
+  - Whether to show the footer explaining the documentation was generated with
+    `clap-markdown`.
+
 
 
 ## [0.1.3] - 2022-12-28

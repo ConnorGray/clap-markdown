@@ -76,18 +76,22 @@ pub fn help_markdown_custom<C: clap::CommandFactory>(
 ) -> String {
     let command = C::command();
 
-    let mut buffer = String::with_capacity(100);
-
-    write_help_markdown(&mut buffer, &command, options);
-
-    buffer
+    return help_markdown_command_custom(&command, options);
 }
 
 /// Format the help information for `command` as Markdown.
 pub fn help_markdown_command(command: &clap::Command) -> String {
+    return help_markdown_command_custom(command, &Default::default());
+}
+
+/// Format the help information for `command` as Markdown, with custom options.
+pub fn help_markdown_command_custom(
+    command: &clap::Command,
+    options: &MarkdownOptions,
+) -> String {
     let mut buffer = String::with_capacity(100);
 
-    write_help_markdown(&mut buffer, command, &Default::default());
+    write_help_markdown(&mut buffer, &command, options);
 
     buffer
 }

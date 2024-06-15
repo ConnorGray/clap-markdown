@@ -16,6 +16,6 @@ categories = ["command-line-interface", "command-line-utilities", "development-t
 clap = "4.*.*"
 
 [dev-dependencies]
-clap = { version = "4.*.*", features = ["derive"] }
+clap = { version = "4.4.0", features = ["derive"] }
 
 pretty_assertions = "1.3.0"
