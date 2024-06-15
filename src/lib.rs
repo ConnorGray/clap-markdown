@@ -338,6 +338,9 @@ fn build_command_markdown(
 }
 
 fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
+    // Markdown list item
+    write!(buffer, "* ")?;
+
     let value_name: String = match arg.get_value_names() {
         // TODO: What if multiple names are provided?
         Some([name, ..]) => name.as_str().to_owned(),
@@ -347,8 +350,6 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
         None => arg.get_id().to_string().to_ascii_uppercase(),
     };
 
-    // Markdown list item
-    write!(buffer, "* ")?;
     match (arg.get_short(), arg.get_long()) {
         (Some(short), Some(long)) => {
             if arg.get_action().takes_values() {
