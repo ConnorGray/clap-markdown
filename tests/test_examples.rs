@@ -1,6 +1,8 @@
 use clap_markdown::MarkdownOptions;
 use pretty_assertions::assert_eq;
 
+/// Tests that the `complex-app` example featured in the README.md is
+/// up-to-date.
 #[test]
 fn test_example_complex_app() {
     mod complex_app {
