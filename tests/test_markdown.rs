@@ -56,13 +56,13 @@ Options:
         "\
 # Command-Line Help for my-program-display-name
 
-This document contains the help content for the `my-program-name` command-line program.
+This document contains the help content for the `my-program-display-name` command-line program.
 
 **Command Overview:**
 
-* [`my-program-name`↴](#my-program-name)
+* [`my-program-display-name`↴](#my-program-display-name)
 
-## `my-program-name`
+## `my-program-display-name`
 
 This program does things.
 
@@ -131,13 +131,13 @@ Options:
         "\
 # Command-Line Help for my-program-display-name
 
-This document contains the help content for the `my-program-name` command-line program.
+This document contains the help content for the `my-program-display-name` command-line program.
 
 **Command Overview:**
 
-* [`my-program-name`↴](#my-program-name)
+* [`my-program-display-name`↴](#my-program-display-name)
 
-## `my-program-name`
+## `my-program-display-name`
 
 This program does things.
 
