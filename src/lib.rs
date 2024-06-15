@@ -12,12 +12,56 @@ mod test_readme {
     #![doc = include_str!("../README.md")]
 }
 
-use std::{
-    default,
-    fmt::{self, Write},
-};
+use std::fmt::{self, Write};
 
 use clap::builder::PossibleValue;
+
+//======================================
+// Public API types
+//======================================
+
+/// Options to customize the structure of the output Markdown document.
+///
+/// Used with [`help_markdown_custom()`].
+#[non_exhaustive]
+pub struct MarkdownOptions {
+    title: Option<String>,
+    show_footer: bool,
+}
+
+impl MarkdownOptions {
+    /// Construct a default instance of `MarkdownOptions`.
+    pub fn new() -> Self {
+        return Self {
+            title: None,
+            show_footer: true,
+        };
+    }
+
+    /// Set a custom title to use in the generated document.
+    pub fn title(mut self, title: String) -> Self {
+        self.title = Some(title);
+
+        return self;
+    }
+
+    /// Whether to show the default footer advertising `clap-markdown`.
+    pub fn show_footer(mut self, show: bool) -> Self {
+        self.show_footer = show;
+
+        return self;
+    }
+}
+
+impl Default for MarkdownOptions {
+    fn default() -> Self {
+        return Self::new();
+    }
+}
+
+//======================================
+// Public API functions
+//======================================
 
 /// Format the help information for `command` as Markdown.
 pub fn help_markdown<C: clap::CommandFactory>() -> String {
@@ -27,8 +71,8 @@ pub fn help_markdown<C: clap::CommandFactory>() -> String {
 }
 
 /// Format the help information for `command` as Markdown, with custom options.
-pub fn custom_help_markdown<C: clap::CommandFactory>(
-    options: MarkdownOptions,
+pub fn help_markdown_custom<C: clap::CommandFactory>(
+    options: &MarkdownOptions,
 ) -> String {
     let command = C::command();
 
@@ -43,7 +87,7 @@ pub fn custom_help_markdown<C: clap::CommandFactory>(
 pub fn help_markdown_command(command: &clap::Command) -> String {
     let mut buffer = String::with_capacity(100);
 
-    write_help_markdown(&mut buffer, command, default::Default::default());
+    write_help_markdown(&mut buffer, command, &Default::default());
 
     buffer
 }
@@ -60,21 +104,15 @@ pub fn print_help_markdown<C: clap::CommandFactory>() {
 
     let mut buffer = String::with_capacity(100);
 
-    write_help_markdown(&mut buffer, &command, default::Default::default());
+    write_help_markdown(&mut buffer, &command, &Default::default());
 
     println!("{}", buffer);
-}
-
-#[derive(Default)]
-pub struct MarkdownOptions {
-    pub title: Option<String>,
-    pub hide_footer: bool,
 }
 
 fn write_help_markdown(
     buffer: &mut String,
     command: &clap::Command,
-    options: MarkdownOptions,
+    options: &MarkdownOptions,
 ) {
     //----------------------------------
     // Write the document title
@@ -120,7 +158,7 @@ fn write_help_markdown(
     //-----------------
     // Write the footer
     //-----------------
-    if !options.hide_footer {
+    if options.show_footer {
         write!(buffer, r#"<hr/>
 
 <small><i>
