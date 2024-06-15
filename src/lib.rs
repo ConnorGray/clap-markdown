@@ -560,9 +560,14 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
     Ok(())
 }
 
-// This is a utility function to get the canonical name of a command. It's logic is
-// to get the display name if it exists, otherwise get the bin name if it exists, otherwise
-// get the package name.
+/// Utility function to get the canonical name of a command.
+///
+/// It's logic is to get the display name if it exists, otherwise get the bin
+/// name if it exists, otherwise get the package name.
+///
+/// Note that the default `Command.name` field of a clap command is typically
+/// meant for programmatic usage as well as for display (if no `display_name`
+/// override is set).
 fn get_canonical_name(command: &clap::Command) -> String {
     command
         .get_display_name()
