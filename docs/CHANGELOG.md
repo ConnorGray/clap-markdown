@@ -8,10 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] — 2024-06-15
+
 ### Added
 
 * Added `help_markdown_custom()` and `help_markdown_command_custom()`, for
-  customizing the built Markdown.
+  customizing the built Markdown using a new `MarkdownOptions` configuration
+  structure.
+  ([#25], co-authored-by [@morgante](https://github.com/morgante)
+  and [@keturiosakys](https://github.com/keturiosakys))
 
   Supported customization options include:
 
@@ -19,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Whether to show the footer explaining the documentation was generated with
     `clap-markdown`.
   - Whether to show the command overview table of contents.
+
+* Added new CI build and test action to the repository, so that new PRs will be
+  required automatically to pass all tests.
+  ([#24])
 
 ### Changed
 
@@ -28,6 +37,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#27],
   co-authored-by [@keturiosakys](https://github.com/keturiosakys)
   and [@hatchan](https://github.com/hatchan))
+
+* The possible values of a flag that can only either be present or absent
+  (true or false) will no longer be shown.
+  ([#22], contributed by [@ilyagr](https://github.com/ilyagr))
+
+* Hidden arguments (`Arg.hide == true`) will no longer be included in the
+  rendered Markdown.
+  ([#22], contributed by [@ilyagr](https://github.com/ilyagr))
+
+* Long help text for commands will now be included in the rendered output.
+  ([#26], contributed by [@morgante](https://github.com/morgante))
+
+* Long help text for options will now be included in the rendered output.
+  ([#23], contributed by [@ilyagr](https://github.com/ilyagr))
 
 
 
@@ -126,11 +149,19 @@ Initial release of `clap-markdown`.
 <!-- v0.1.3 -->
 [#11]: https://github.com/ConnorGray/clap-markdown/pull/11
 
-<!-- Unreleased -->
+<!-- v0.1.4 -->
+[#22]: https://github.com/ConnorGray/clap-markdown/pull/22
+[#23]: https://github.com/ConnorGray/clap-markdown/pull/23
+[#24]: https://github.com/ConnorGray/clap-markdown/pull/24
+[#25]: https://github.com/ConnorGray/clap-markdown/pull/25
+[#26]: https://github.com/ConnorGray/clap-markdown/pull/26
 [#27]: https://github.com/ConnorGray/clap-markdown/pull/27
 
-[unreleased]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.3...HEAD
+<!-- Unreleased -->
 
+[Unreleased]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.4...HEAD
+
+[0.1.4]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.0...v0.1.1
