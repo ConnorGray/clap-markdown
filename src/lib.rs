@@ -305,9 +305,11 @@ fn build_command_markdown(
         writeln!(buffer, "{}\n", about)?;
     }
 
-    // TODO(feature): Support printing custom before and after help texts.
-    assert!(command.get_before_help().is_none());
-    assert!(command.get_after_help().is_none());
+    if let Some(help) = command.get_before_long_help() {
+        writeln!(buffer, "{}\n", help)?;
+    } else if let Some(help) = command.get_before_help() {
+        writeln!(buffer, "{}\n", help)?;
+    }
 
     writeln!(
         buffer,
@@ -325,6 +327,12 @@ fn build_command_markdown(
             .to_string()
             .replace("Usage: ", "")
     )?;
+
+    if let Some(help) = command.get_after_long_help() {
+        writeln!(buffer, "{}\n", help)?;
+    } else if let Some(help) = command.get_after_help() {
+        writeln!(buffer, "{}\n", help)?;
+    }
 
     //----------------------------------
     // Subcommands
