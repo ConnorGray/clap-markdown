@@ -53,9 +53,6 @@ does testing things
 
 * `-l`, `--list` — lists test values
 
-  Possible values: `true`, `false`
-
-
 
 
 ## `complex-app only-hidden-options`
