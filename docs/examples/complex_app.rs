@@ -12,11 +12,14 @@ pub struct Cli {
     name: Option<String>,
 
     /// Sets a custom config file
-    #[arg(short, long, value_name = "FILE")]
+    #[arg(short, long, value_name = "FILE", visible_alias = "configuration")]
     config: Option<PathBuf>,
 
     #[arg(long, default_value = "local")]
     target: Target,
+
+    #[arg(long, visible_alias = "vv", visible_alias = "vvv")]
+    very_very_verbose: bool,
 
     /// Turn debugging information on
     ///
@@ -34,6 +37,7 @@ pub struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// does testing things
+    #[command(visible_alias = "tester")]
     Test {
         /// lists test values
         #[arg(short, long)]

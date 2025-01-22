@@ -16,7 +16,7 @@ An example command-line tool
 
 ###### **Subcommands:**
 
-* `test` — does testing things
+* `test` [alias: `tester`] — does testing things
 * `only-hidden-options` — Demo that `Options` is not printed if all options are hidden
 
 ###### **Arguments:**
@@ -27,7 +27,7 @@ An example command-line tool
 
 ###### **Options:**
 
-* `-c`, `--config <FILE>` — Sets a custom config file
+* `-c`, `--config <FILE>` [alias: `configuration`] — Sets a custom config file
 * `--target <TARGET>`
 
   Default value: `local`
@@ -37,13 +37,14 @@ An example command-line tool
     Do the operation locally
   - `remote`
 
+* `--very-very-verbose` [aliases: `vv`, `vvv`]
 * `-d`, `--debug` — Turn debugging information on
 
    Repeat this option to see more and more debug information.
 
 
 
-## `complex-app test`
+## `complex-app test` [alias: `tester`]
 
 does testing things
 
