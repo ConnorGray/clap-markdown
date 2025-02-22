@@ -12,7 +12,10 @@ mod test_readme {
     #![doc = include_str!("../README.md")]
 }
 
-use std::fmt::{self, Write};
+use std::{
+    cmp::{max, min},
+    fmt::{self, Write},
+};
 
 use clap::builder::PossibleValue;
 
@@ -25,9 +28,13 @@ use clap::builder::PossibleValue;
 /// Used with [`help_markdown_custom()`].
 #[non_exhaustive]
 pub struct MarkdownOptions {
-    title: Option<String>,
-    show_footer: bool,
-    show_table_of_contents: bool,
+    pub title: Option<String>,
+    pub show_footer: bool,
+    pub show_table_of_contents: bool,
+
+    // a max_depth of 1 will write all commands and subcommands on the same level
+    // a higher max_depth will indent subcommands up to that level
+    pub max_depth: usize,
 }
 
 impl MarkdownOptions {
@@ -37,28 +44,32 @@ impl MarkdownOptions {
             title: None,
             show_footer: true,
             show_table_of_contents: true,
+            max_depth: 1,
         };
     }
 
     /// Set a custom title to use in the generated document.
     pub fn title(mut self, title: String) -> Self {
         self.title = Some(title);
-
-        return self;
+        self
     }
 
     /// Whether to show the default footer advertising `clap-markdown`.
     pub fn show_footer(mut self, show: bool) -> Self {
         self.show_footer = show;
-
-        return self;
+        self
     }
 
     /// Whether to show the default table of contents.
     pub fn show_table_of_contents(mut self, show: bool) -> Self {
         self.show_table_of_contents = show;
+        self
+    }
 
-        return self;
+    /// Set Maximum level of indentation for subcommands
+    pub fn with_max_depth(mut self, depth: usize) -> Self {
+        self.max_depth = depth;
+        self
     }
 }
 
@@ -74,9 +85,7 @@ impl Default for MarkdownOptions {
 
 /// Format the help information for `command` as Markdown.
 pub fn help_markdown<C: clap::CommandFactory>() -> String {
-    let command = C::command();
-
-    help_markdown_command(&command)
+    help_markdown_custom::<C>(&Default::default())
 }
 
 /// Format the help information for `command` as Markdown, with custom options.
@@ -84,13 +93,12 @@ pub fn help_markdown_custom<C: clap::CommandFactory>(
     options: &MarkdownOptions,
 ) -> String {
     let command = C::command();
-
-    return help_markdown_command_custom(&command, options);
+    help_markdown_command_custom(&command, options)
 }
 
 /// Format the help information for `command` as Markdown.
 pub fn help_markdown_command(command: &clap::Command) -> String {
-    return help_markdown_command_custom(command, &Default::default());
+    help_markdown_command_custom(command, &Default::default())
 }
 
 /// Format the help information for `command` as Markdown, with custom options.
@@ -99,9 +107,7 @@ pub fn help_markdown_command_custom(
     options: &MarkdownOptions,
 ) -> String {
     let mut buffer = String::with_capacity(100);
-
     write_help_markdown(&mut buffer, &command, options);
-
     buffer
 }
 
@@ -114,11 +120,8 @@ pub fn help_markdown_command_custom(
 /// Output is printed to the standard output, using [`println!`].
 pub fn print_help_markdown<C: clap::CommandFactory>() {
     let command = C::command();
-
     let mut buffer = String::with_capacity(100);
-
     write_help_markdown(&mut buffer, &command, &Default::default());
-
     println!("{}", buffer);
 }
 
@@ -130,7 +133,6 @@ fn write_help_markdown(
     //----------------------------------
     // Write the document title
     //----------------------------------
-
     let title_name = get_canonical_name(command);
 
     let title = match options.title {
@@ -148,11 +150,6 @@ fn write_help_markdown(
     //----------------------------------
     // Write the table of contents
     //----------------------------------
-
-    // writeln!(buffer, r#"<div style="background: light-gray"><ul>"#).unwrap();
-    // build_table_of_contents_html(buffer, Vec::new(), command, 0).unwrap();
-    // writeln!(buffer, "</ul></div>").unwrap();
-
     if options.show_table_of_contents {
         writeln!(buffer, "**Command Overview:**\n").unwrap();
 
@@ -165,8 +162,7 @@ fn write_help_markdown(
     //----------------------------------------
     // Write the commands/subcommands sections
     //----------------------------------------
-
-    build_command_markdown(buffer, Vec::new(), command, 0).unwrap();
+    build_command_markdown(buffer, Vec::new(), command, 0, options).unwrap();
 
     //-----------------
     // Write the footer
@@ -227,57 +223,13 @@ fn build_table_of_contents_markdown(
     Ok(())
 }
 
-/*
-fn build_table_of_contents_html(
-    buffer: &mut String,
-    // Parent commands of `command`.
-    parent_command_path: Vec<String>,
-    command: &clap::Command,
-    depth: usize,
-) -> std::fmt::Result {
-    // Don't document commands marked with `clap(hide = true)` (which includes
-    // `print-all-help`).
-    if command.is_hide_set() {
-        return Ok(());
-    }
-
-    // Append the name of `command` to `command_path`.
-    let command_path = {
-        let mut command_path = parent_command_path;
-        command_path.push(command.get_name().to_owned());
-        command_path
-    };
-
-    writeln!(
-        buffer,
-        "<li><a href=\"#{}\"><code>{}</code>↴</a></li>",
-        command_path.join("-"),
-        command_path.join(" ")
-    )?;
-
-    //----------------------------------
-    // Recurse to write subcommands
-    //----------------------------------
-
-    for subcommand in command.get_subcommands() {
-        build_table_of_contents_html(
-            buffer,
-            command_path.clone(),
-            subcommand,
-            depth + 1,
-        )?;
-    }
-
-    Ok(())
-}
-*/
-
 fn build_command_markdown(
     buffer: &mut String,
     // Parent commands of `command`.
     parent_command_path: Vec<String>,
     command: &clap::Command,
     depth: usize,
+    options: &MarkdownOptions,
 ) -> std::fmt::Result {
     // Don't document commands marked with `clap(hide = true)` (which includes
     // `print-all-help`).
@@ -298,21 +250,12 @@ fn build_command_markdown(
     // Write the markdown heading
     //----------------------------------
 
-    // TODO: `depth` is now unused. Remove if no other use for it appears.
-    /*
-    if depth >= 6 {
-        panic!(
-            "command path nesting depth is deeper than maximum markdown header depth: `{}`",
-            command_path.join(" ")
-        )
-    }
-    */
+    let depth = min(depth, options.max_depth);
 
     writeln!(
         buffer,
         "{} `{}`\n",
-        // "#".repeat(depth + 1),
-        "##",
+        "#".repeat(max(depth, 1) + 1),
         command_path.join(" "),
     )?;
 
@@ -423,6 +366,7 @@ fn build_command_markdown(
             command_path.clone(),
             subcommand,
             depth + 1,
+            options,
         )?;
     }
 
