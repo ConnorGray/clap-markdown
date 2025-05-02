@@ -10,7 +10,7 @@ An example command-line tool
 
 ###### **Subcommands:**
 
-* `test` [alias: `tester`] — does testing things
+* `test` — does testing things
 * `only-hidden-options` — Demo that `Options` is not printed if all options are hidden
 
 ###### **Arguments:**
@@ -38,7 +38,7 @@ An example command-line tool
 
 
 
-## `complex-app test` [alias: `tester`]
+## `complex-app test`
 
 does testing things
 

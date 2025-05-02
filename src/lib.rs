@@ -12,9 +12,13 @@ mod test_readme {
     #![doc = include_str!("../README.md")]
 }
 
+mod utils;
+
 use std::fmt::{self, Write};
 
 use clap::builder::PossibleValue;
+
+use utils::pluralize;
 
 //======================================
 // Public API types
@@ -28,6 +32,7 @@ pub struct MarkdownOptions {
     title: Option<String>,
     show_footer: bool,
     show_table_of_contents: bool,
+    show_aliases: bool,
 }
 
 impl MarkdownOptions {
@@ -37,6 +42,7 @@ impl MarkdownOptions {
             title: None,
             show_footer: true,
             show_table_of_contents: true,
+            show_aliases: true,
         };
     }
 
@@ -57,6 +63,13 @@ impl MarkdownOptions {
     /// Whether to show the default table of contents.
     pub fn show_table_of_contents(mut self, show: bool) -> Self {
         self.show_table_of_contents = show;
+
+        return self;
+    }
+
+    /// Whether to show aliases for arguments and commands.
+    pub fn show_aliases(mut self, show: bool) -> Self {
+        self.show_aliases = show;
 
         return self;
     }
@@ -166,7 +179,7 @@ fn write_help_markdown(
     // Write the commands/subcommands sections
     //----------------------------------------
 
-    build_command_markdown(buffer, Vec::new(), command, 0).unwrap();
+    build_command_markdown(buffer, Vec::new(), command, 0, options).unwrap();
 
     //-----------------
     // Write the footer
@@ -278,6 +291,7 @@ fn build_command_markdown(
     parent_command_path: Vec<String>,
     command: &clap::Command,
     depth: usize,
+    options: &MarkdownOptions,
 ) -> std::fmt::Result {
     // Don't document commands marked with `clap(hide = true)` (which includes
     // `print-all-help`).
@@ -307,12 +321,7 @@ fn build_command_markdown(
         )
     }
     */
-    let aliases = command.get_visible_aliases().collect::<Vec<&str>>();
-    let aliases = get_alias_str(&aliases)
-        .map(|s| format!(" {s}"))
-        .unwrap_or_default();
-
-    writeln!(buffer, "## `{}`{aliases}\n", command_path.join(" "),)?;
+    writeln!(buffer, "## `{}`\n", command_path.join(" "))?;
 
     if let Some(long_about) = command.get_long_about() {
         writeln!(buffer, "{}\n", long_about)?;
@@ -343,6 +352,17 @@ fn build_command_markdown(
             .replace("Usage: ", "")
     )?;
 
+    if options.show_aliases {
+        let aliases = command.get_visible_aliases().collect::<Vec<&str>>();
+        if let Some(aliases_str) = get_alias_string(&aliases) {
+            writeln!(
+                buffer,
+                "**{}:** {aliases_str}\n",
+                pluralize(aliases.len(), "Command Alias", "Command Aliases")
+            )?;
+        }
+    }
+
     if let Some(help) = command.get_after_long_help() {
         writeln!(buffer, "{}\n", help)?;
     } else if let Some(help) = command.get_after_help() {
@@ -362,17 +382,13 @@ fn build_command_markdown(
             }
 
             let title_name = get_canonical_name(subcommand);
-            let aliases = subcommand.get_visible_aliases().collect::<Vec<&str>>();
-            let aliases = get_alias_str(&aliases)
-                .map(|s| format!(" {s}"))
-                .unwrap_or_default();
 
             let about = match subcommand.get_about() {
                 Some(about) => about.to_string(),
                 None => String::new(),
             };
 
-            writeln!(buffer, "* `{title_name}`{aliases} — {about}",)?;
+            writeln!(buffer, "* `{title_name}` — {about}",)?;
         }
 
         write!(buffer, "\n")?;
@@ -425,6 +441,7 @@ fn build_command_markdown(
             command_path.clone(),
             subcommand,
             depth + 1,
+            options,
         )?;
     }
 
@@ -474,8 +491,12 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
     }
 
     if let Some(aliases) = arg.get_visible_aliases().as_deref() {
-        if let Some(aliases) = get_alias_str(aliases) {
-            write!(buffer, " {aliases}")?;
+        if let Some(aliases_str) = get_alias_string(aliases) {
+            write!(
+                buffer,
+                " [{}: {aliases_str}]",
+                pluralize(aliases.len(), "alias", "aliases")
+            )?;
         }
     }
 
@@ -605,30 +626,16 @@ fn indent(s: &str, first: &str, rest: &str) -> String {
     result
 }
 
-fn wrap_with(s: &str, wrapper: &str) -> String {
-    format!("{wrapper}{s}{wrapper}")
-}
-
-fn wrap_with_backticks(s: &str) -> String {
-    wrap_with(s, "`")
-}
-
-fn get_alias_str(aliases: &[&str]) -> Option<String> {
+fn get_alias_string(aliases: &[&str]) -> Option<String> {
     if aliases.is_empty() {
         return None;
     }
 
-    let prefix = if aliases.len() == 1 {
-        "alias"
-    } else {
-        "aliases"
-    };
-
     Some(format!(
-        "[{prefix}: {}]",
+        "{}",
         aliases
             .iter()
-            .map(|s| wrap_with_backticks(s))
+            .map(|alias| format!("`{alias}`"))
             .collect::<Vec<_>>()
             .join(", ")
     ))
