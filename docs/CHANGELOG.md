@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.5] — 2025-05-01
+
+### Added
+
+* `clap-markdown` will now list subcommand and argument aliases in the generated
+  Markdown. ([#36], authored by [@willemneal](https://github.com/willemneal),
+  and [#41]).
+
+  This can be controlled with the new `MarkdownOptions::show_aliases()` option
+  setter.
+
 ## [0.1.4] — 2024-06-15
 
 ### Added
@@ -157,10 +168,15 @@ Initial release of `clap-markdown`.
 [#26]: https://github.com/ConnorGray/clap-markdown/pull/26
 [#27]: https://github.com/ConnorGray/clap-markdown/pull/27
 
+<!-- v0.1.5 -->
+[#36]: https://github.com/ConnorGray/clap-markdown/pull/36
+[#41]: https://github.com/ConnorGray/clap-markdown/pull/41
+
 <!-- Unreleased -->
 
-[Unreleased]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.5...HEAD
 
+[0.1.5]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/ConnorGray/clap-markdown/compare/v0.1.1...v0.1.2

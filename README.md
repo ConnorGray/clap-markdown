@@ -98,7 +98,7 @@ version number of `clap-markdown` will be changed.
 
 | `clap-markdown` | `clap`    |
 |-----------------|-----------|
-| v0.0.1 – v0.1.4 | `"4.*.*"` |
+| v0.0.1 – v0.1.5 | `"4.*.*"` |
 
 
 ## License
