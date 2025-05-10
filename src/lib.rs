@@ -107,7 +107,7 @@ pub fn help_markdown_command_custom(
 ) -> String {
     let mut buffer = String::with_capacity(100);
 
-    write_help_markdown(&mut buffer, &command, options);
+    write_help_markdown(&mut buffer, command, options);
 
     buffer
 }
