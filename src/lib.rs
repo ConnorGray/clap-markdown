@@ -342,7 +342,7 @@ fn build_command_markdown(
             String::new()
         } else {
             let mut s = parent_command_path.join(" ");
-            s.push_str(" ");
+            s.push(' ');
             s
         },
         command
