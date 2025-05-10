@@ -38,46 +38,42 @@ pub struct MarkdownOptions {
 impl MarkdownOptions {
     /// Construct a default instance of `MarkdownOptions`.
     pub fn new() -> Self {
-        return Self {
+        Self {
             title: None,
             show_footer: true,
             show_table_of_contents: true,
             show_aliases: true,
-        };
+        }
     }
 
     /// Set a custom title to use in the generated document.
     pub fn title(mut self, title: String) -> Self {
         self.title = Some(title);
-
-        return self;
+        self
     }
 
     /// Whether to show the default footer advertising `clap-markdown`.
     pub fn show_footer(mut self, show: bool) -> Self {
         self.show_footer = show;
-
-        return self;
+        self
     }
 
     /// Whether to show the default table of contents.
     pub fn show_table_of_contents(mut self, show: bool) -> Self {
         self.show_table_of_contents = show;
-
-        return self;
+        self
     }
 
     /// Whether to show aliases for arguments and commands.
     pub fn show_aliases(mut self, show: bool) -> Self {
         self.show_aliases = show;
-
-        return self;
+        self
     }
 }
 
 impl Default for MarkdownOptions {
     fn default() -> Self {
-        return Self::new();
+        Self::new()
     }
 }
 
@@ -88,7 +84,6 @@ impl Default for MarkdownOptions {
 /// Format the help information for `command` as Markdown.
 pub fn help_markdown<C: clap::CommandFactory>() -> String {
     let command = C::command();
-
     help_markdown_command(&command)
 }
 
@@ -97,13 +92,12 @@ pub fn help_markdown_custom<C: clap::CommandFactory>(
     options: &MarkdownOptions,
 ) -> String {
     let command = C::command();
-
-    return help_markdown_command_custom(&command, options);
+    help_markdown_command_custom(&command, options)
 }
 
 /// Format the help information for `command` as Markdown.
 pub fn help_markdown_command(command: &clap::Command) -> String {
-    return help_markdown_command_custom(command, &Default::default());
+    help_markdown_command_custom(command, &Default::default())
 }
 
 /// Format the help information for `command` as Markdown, with custom options.
