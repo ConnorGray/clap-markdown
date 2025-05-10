@@ -172,7 +172,7 @@ fn write_help_markdown(
         build_table_of_contents_markdown(buffer, Vec::new(), command, 0)
             .unwrap();
 
-        write!(buffer, "\n").unwrap();
+        writeln!(buffer).unwrap();
     }
 
     //----------------------------------------
@@ -391,7 +391,7 @@ fn build_command_markdown(
             writeln!(buffer, "* `{title_name}` — {about}",)?;
         }
 
-        write!(buffer, "\n")?;
+        writeln!(buffer)?;
     }
 
     //----------------------------------
@@ -405,7 +405,7 @@ fn build_command_markdown(
             write_arg_markdown(buffer, pos_arg)?;
         }
 
-        write!(buffer, "\n")?;
+        writeln!(buffer)?;
     }
 
     //----------------------------------
@@ -424,7 +424,7 @@ fn build_command_markdown(
             write_arg_markdown(buffer, arg)?;
         }
 
-        write!(buffer, "\n")?;
+        writeln!(buffer)?;
     }
 
     //----------------------------------
@@ -433,7 +433,7 @@ fn build_command_markdown(
 
     // Include extra space between commands. This is purely for the benefit of
     // anyone reading the source .md file.
-    write!(buffer, "\n\n")?;
+    writeln!(buffer, "\n")?;
 
     for subcommand in command.get_subcommands() {
         build_command_markdown(
