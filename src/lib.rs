@@ -631,14 +631,11 @@ fn get_alias_string(aliases: &[&str]) -> Option<String> {
         return None;
     }
 
-    Some(format!(
-        "{}",
-        aliases
+    Some(aliases
             .iter()
             .map(|alias| format!("`{alias}`"))
             .collect::<Vec<_>>()
-            .join(", ")
-    ))
+            .join(", "))
 }
 
 #[cfg(test)]
