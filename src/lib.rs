@@ -643,11 +643,11 @@ fn get_alias_string(aliases: &[&str]) -> Option<String> {
 
 #[cfg(test)]
 mod test {
+    use super::*;
     use pretty_assertions::assert_eq;
 
     #[test]
     fn test_indent() {
-        use super::indent;
         assert_eq!(
             &indent("Header\n\nMore info", "___", "~~~~"),
             "___Header\n\n~~~~More info\n"
@@ -658,5 +658,17 @@ mod test {
         );
         assert_eq!(&indent("", "___", "~~~~"), "\n");
         assert_eq!(&indent("\n", "___", "~~~~"), "\n");
+    }
+
+    #[test]
+    fn test_get_alias_string() {
+        let aliases = &[];
+        assert!(get_alias_string(aliases).is_none());
+
+        let aliases = &["foo"];
+        assert_eq!(get_alias_string(aliases).unwrap(), "`foo`");
+
+        let aliases = &["foo", "bar", "baz"];
+        assert_eq!(get_alias_string(aliases).unwrap(), "`foo`, `bar`, `baz`");
     }
 }
