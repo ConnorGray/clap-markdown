@@ -630,12 +630,9 @@ fn get_alias_string(aliases: &[&str]) -> Option<String> {
     if aliases.is_empty() {
         return None;
     }
-
-    Some(aliases
-            .iter()
-            .map(|alias| format!("`{alias}`"))
-            .collect::<Vec<_>>()
-            .join(", "))
+    let aliases: Vec<_> =
+        aliases.iter().map(|alias| format!("`{alias}`")).collect();
+    Some(aliases.join(", "))
 }
 
 #[cfg(test)]
