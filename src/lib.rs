@@ -126,7 +126,7 @@ pub fn print_help_markdown<C: clap::CommandFactory>() {
 
     write_help_markdown(&mut buffer, &command, &Default::default());
 
-    println!("{}", buffer);
+    println!("{buffer}");
 }
 
 fn write_help_markdown(
@@ -148,8 +148,7 @@ fn write_help_markdown(
 
     writeln!(
         buffer,
-        "This document contains the help content for the `{}` command-line program.\n",
-        title_name
+        "This document contains the help content for the `{title_name}` command-line program.\n"
     ).unwrap();
 
     //----------------------------------
@@ -318,15 +317,15 @@ fn build_command_markdown(
     writeln!(buffer, "## `{}`\n", command_path.join(" "))?;
 
     if let Some(long_about) = command.get_long_about() {
-        writeln!(buffer, "{}\n", long_about)?;
+        writeln!(buffer, "{long_about}\n")?;
     } else if let Some(about) = command.get_about() {
-        writeln!(buffer, "{}\n", about)?;
+        writeln!(buffer, "{about}\n")?;
     }
 
     if let Some(help) = command.get_before_long_help() {
-        writeln!(buffer, "{}\n", help)?;
+        writeln!(buffer, "{help}\n")?;
     } else if let Some(help) = command.get_before_help() {
-        writeln!(buffer, "{}\n", help)?;
+        writeln!(buffer, "{help}\n")?;
     }
 
     writeln!(
@@ -358,9 +357,9 @@ fn build_command_markdown(
     }
 
     if let Some(help) = command.get_after_long_help() {
-        writeln!(buffer, "{}\n", help)?;
+        writeln!(buffer, "{help}\n")?;
     } else if let Some(help) = command.get_after_help() {
-        writeln!(buffer, "{}\n", help)?;
+        writeln!(buffer, "{help}\n")?;
     }
 
     //----------------------------------
@@ -472,9 +471,9 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
         },
         (None, Some(long)) => {
             if arg.get_action().takes_values() {
-                write!(buffer, "`--{} <{value_name}>`", long)?
+                write!(buffer, "`--{long} <{value_name}>`")?
             } else {
-                write!(buffer, "`--{}`", long)?
+                write!(buffer, "`--{long}`")?
             }
         },
         (None, None) => {
