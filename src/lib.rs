@@ -568,8 +568,7 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
                     },
                     None => format!("  - `{}`\n", pv.get_name()),
                 })
-                .collect::<Vec<String>>()
-                .join("");
+                .collect();
 
             writeln!(buffer, "\n  Possible values:\n{text}")?;
         } else {
