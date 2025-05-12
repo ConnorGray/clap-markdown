@@ -14,7 +14,7 @@ mod test_readme {
 
 mod utils;
 
-use std::fmt::{self, Write};
+use std::fmt::Write;
 
 use clap::builder::PossibleValue;
 
@@ -441,7 +441,10 @@ fn build_command_markdown(
     Ok(())
 }
 
-fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
+fn write_arg_markdown(
+    buffer: &mut String,
+    arg: &clap::Arg,
+) -> std::fmt::Result {
     // Markdown list item
     write!(buffer, "* ")?;
 
