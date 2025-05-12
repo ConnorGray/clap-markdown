@@ -601,8 +601,8 @@ fn get_canonical_name(command: &clap::Command) -> String {
     command
         .get_display_name()
         .or_else(|| command.get_bin_name())
-        .map(|name| name.to_owned())
-        .unwrap_or_else(|| command.get_name().to_owned())
+        .unwrap_or_else(|| command.get_name())
+        .to_owned()
 }
 
 /// Indents non-empty lines. The output always ends with a newline.
