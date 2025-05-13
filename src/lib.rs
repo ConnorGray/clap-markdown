@@ -28,6 +28,7 @@ use utils::pluralize;
 ///
 /// Used with [`help_markdown_custom()`].
 #[non_exhaustive]
+#[must_use]
 pub struct MarkdownOptions {
     title: Option<String>,
     show_footer: bool,
