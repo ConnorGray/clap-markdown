@@ -14,7 +14,7 @@ mod test_readme {
 
 mod utils;
 
-use std::fmt::{self, Write};
+use std::fmt::Write;
 
 use clap::builder::PossibleValue;
 
@@ -38,46 +38,42 @@ pub struct MarkdownOptions {
 impl MarkdownOptions {
     /// Construct a default instance of `MarkdownOptions`.
     pub fn new() -> Self {
-        return Self {
+        Self {
             title: None,
             show_footer: true,
             show_table_of_contents: true,
             show_aliases: true,
-        };
+        }
     }
 
     /// Set a custom title to use in the generated document.
     pub fn title(mut self, title: String) -> Self {
         self.title = Some(title);
-
-        return self;
+        self
     }
 
     /// Whether to show the default footer advertising `clap-markdown`.
     pub fn show_footer(mut self, show: bool) -> Self {
         self.show_footer = show;
-
-        return self;
+        self
     }
 
     /// Whether to show the default table of contents.
     pub fn show_table_of_contents(mut self, show: bool) -> Self {
         self.show_table_of_contents = show;
-
-        return self;
+        self
     }
 
     /// Whether to show aliases for arguments and commands.
     pub fn show_aliases(mut self, show: bool) -> Self {
         self.show_aliases = show;
-
-        return self;
+        self
     }
 }
 
 impl Default for MarkdownOptions {
     fn default() -> Self {
-        return Self::new();
+        Self::new()
     }
 }
 
@@ -88,7 +84,6 @@ impl Default for MarkdownOptions {
 /// Format the help information for `command` as Markdown.
 pub fn help_markdown<C: clap::CommandFactory>() -> String {
     let command = C::command();
-
     help_markdown_command(&command)
 }
 
@@ -97,13 +92,12 @@ pub fn help_markdown_custom<C: clap::CommandFactory>(
     options: &MarkdownOptions,
 ) -> String {
     let command = C::command();
-
-    return help_markdown_command_custom(&command, options);
+    help_markdown_command_custom(&command, options)
 }
 
 /// Format the help information for `command` as Markdown.
 pub fn help_markdown_command(command: &clap::Command) -> String {
-    return help_markdown_command_custom(command, &Default::default());
+    help_markdown_command_custom(command, &Default::default())
 }
 
 /// Format the help information for `command` as Markdown, with custom options.
@@ -113,7 +107,7 @@ pub fn help_markdown_command_custom(
 ) -> String {
     let mut buffer = String::with_capacity(100);
 
-    write_help_markdown(&mut buffer, &command, options);
+    write_help_markdown(&mut buffer, command, options);
 
     buffer
 }
@@ -132,7 +126,7 @@ pub fn print_help_markdown<C: clap::CommandFactory>() {
 
     write_help_markdown(&mut buffer, &command, &Default::default());
 
-    println!("{}", buffer);
+    println!("{buffer}");
 }
 
 fn write_help_markdown(
@@ -154,8 +148,7 @@ fn write_help_markdown(
 
     writeln!(
         buffer,
-        "This document contains the help content for the `{}` command-line program.\n",
-        title_name
+        "This document contains the help content for the `{title_name}` command-line program.\n"
     ).unwrap();
 
     //----------------------------------
@@ -324,15 +317,15 @@ fn build_command_markdown(
     writeln!(buffer, "## `{}`\n", command_path.join(" "))?;
 
     if let Some(long_about) = command.get_long_about() {
-        writeln!(buffer, "{}\n", long_about)?;
+        writeln!(buffer, "{long_about}\n")?;
     } else if let Some(about) = command.get_about() {
-        writeln!(buffer, "{}\n", about)?;
+        writeln!(buffer, "{about}\n")?;
     }
 
     if let Some(help) = command.get_before_long_help() {
-        writeln!(buffer, "{}\n", help)?;
+        writeln!(buffer, "{help}\n")?;
     } else if let Some(help) = command.get_before_help() {
-        writeln!(buffer, "{}\n", help)?;
+        writeln!(buffer, "{help}\n")?;
     }
 
     writeln!(
@@ -364,9 +357,9 @@ fn build_command_markdown(
     }
 
     if let Some(help) = command.get_after_long_help() {
-        writeln!(buffer, "{}\n", help)?;
+        writeln!(buffer, "{help}\n")?;
     } else if let Some(help) = command.get_after_help() {
-        writeln!(buffer, "{}\n", help)?;
+        writeln!(buffer, "{help}\n")?;
     }
 
     //----------------------------------
@@ -448,7 +441,10 @@ fn build_command_markdown(
     Ok(())
 }
 
-fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
+fn write_arg_markdown(
+    buffer: &mut String,
+    arg: &clap::Arg,
+) -> std::fmt::Result {
     // Markdown list item
     write!(buffer, "* ")?;
 
@@ -478,9 +474,9 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
         },
         (None, Some(long)) => {
             if arg.get_action().takes_values() {
-                write!(buffer, "`--{} <{value_name}>`", long)?
+                write!(buffer, "`--{long} <{value_name}>`")?
             } else {
-                write!(buffer, "`--{}`", long)?
+                write!(buffer, "`--{long}`")?
             }
         },
         (None, None) => {
