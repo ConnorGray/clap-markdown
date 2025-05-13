@@ -27,7 +27,7 @@ An example command-line tool
 
 ###### **Options:**
 
-* `-c`, `--config <FILE>` [alias: `configuration`] — Sets a custom config file
+* `-c`, `--config <FILE>` [alias: `--configuration`] — Sets a custom config file
 * `--target <TARGET>`
 
   Default value: `local`
@@ -37,7 +37,7 @@ An example command-line tool
     Do the operation locally
   - `remote`
 
-* `--very-very-verbose` [aliases: `vv`, `vvv`]
+* `--very-very-verbose` [aliases: `--vv`, `--vvv`]
 * `-d`, `--debug` — Turn debugging information on
 
    Repeat this option to see more and more debug information.

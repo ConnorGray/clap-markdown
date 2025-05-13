@@ -354,7 +354,9 @@ fn build_command_markdown(
 
     if options.show_aliases {
         let aliases = command.get_visible_aliases().collect::<Vec<&str>>();
-        if let Some(aliases_str) = get_alias_string(&aliases) {
+        if let Some(aliases_str) =
+            get_alias_string(&aliases, &AliasFor::Command)
+        {
             writeln!(
                 buffer,
                 "**{}:** {aliases_str}\n",
@@ -491,7 +493,7 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
     }
 
     if let Some(aliases) = arg.get_visible_aliases().as_deref() {
-        if let Some(aliases_str) = get_alias_string(aliases) {
+        if let Some(aliases_str) = get_alias_string(aliases, &AliasFor::Arg) {
             write!(
                 buffer,
                 " [{}: {aliases_str}]",
@@ -626,28 +628,32 @@ fn indent(s: &str, first: &str, rest: &str) -> String {
     result
 }
 
-fn get_alias_string(aliases: &[&str]) -> Option<String> {
+enum AliasFor {
+    Command,
+    Arg,
+}
+
+fn get_alias_string(aliases: &[&str], alias_for: &AliasFor) -> Option<String> {
     if aliases.is_empty() {
         return None;
     }
-
-    Some(format!(
-        "{}",
-        aliases
-            .iter()
-            .map(|alias| format!("`{alias}`"))
-            .collect::<Vec<_>>()
-            .join(", ")
-    ))
+    let aliases: Vec<_> = aliases
+        .iter()
+        .map(|alias| match alias_for {
+            AliasFor::Command => format!("`{alias}`"),
+            AliasFor::Arg => format!("`--{alias}`"),
+        })
+        .collect();
+    Some(aliases.join(", "))
 }
 
 #[cfg(test)]
 mod test {
+    use super::*;
     use pretty_assertions::assert_eq;
 
     #[test]
     fn test_indent() {
-        use super::indent;
         assert_eq!(
             &indent("Header\n\nMore info", "___", "~~~~"),
             "___Header\n\n~~~~More info\n"
@@ -658,5 +664,41 @@ mod test {
         );
         assert_eq!(&indent("", "___", "~~~~"), "\n");
         assert_eq!(&indent("\n", "___", "~~~~"), "\n");
+    }
+
+    #[test]
+    fn test_get_alias_string_for_command() {
+        let aliases = &[];
+        assert!(get_alias_string(aliases, &AliasFor::Command).is_none());
+
+        let aliases = &["foo"];
+        assert_eq!(
+            get_alias_string(aliases, &AliasFor::Command).unwrap(),
+            "`foo`"
+        );
+
+        let aliases = &["foo", "bar", "baz"];
+        assert_eq!(
+            get_alias_string(aliases, &AliasFor::Command).unwrap(),
+            "`foo`, `bar`, `baz`"
+        );
+    }
+
+    #[test]
+    fn test_get_alias_string_for_arg() {
+        let aliases = &[];
+        assert!(get_alias_string(aliases, &AliasFor::Arg).is_none());
+
+        let aliases = &["foo"];
+        assert_eq!(
+            get_alias_string(aliases, &AliasFor::Arg).unwrap(),
+            "`--foo`"
+        );
+
+        let aliases = &["foo", "bar", "baz"];
+        assert_eq!(
+            get_alias_string(aliases, &AliasFor::Arg).unwrap(),
+            "`--foo`, `--bar`, `--baz`"
+        );
     }
 }
