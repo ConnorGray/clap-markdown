@@ -103,7 +103,7 @@ pub fn help_markdown_custom<C: clap::CommandFactory>(
 
 /// Format the help information for `command` as Markdown.
 pub fn help_markdown_command(command: &clap::Command) -> String {
-    return help_markdown_command_custom(command, &Default::default());
+    return help_markdown_command_custom(command, &MarkdownOptions::default());
 }
 
 /// Format the help information for `command` as Markdown, with custom options.
@@ -130,7 +130,7 @@ pub fn print_help_markdown<C: clap::CommandFactory>() {
 
     let mut buffer = String::with_capacity(100);
 
-    write_help_markdown(&mut buffer, &command, &Default::default());
+    write_help_markdown(&mut buffer, &command, &MarkdownOptions::default());
 
     println!("{}", buffer);
 }
@@ -169,17 +169,16 @@ fn write_help_markdown(
     if options.show_table_of_contents {
         writeln!(buffer, "**Command Overview:**\n").unwrap();
 
-        build_table_of_contents_markdown(buffer, Vec::new(), command, 0)
-            .unwrap();
+        build_table_of_contents_markdown(buffer, &[], command, 0).unwrap();
 
-        write!(buffer, "\n").unwrap();
+        writeln!(buffer).unwrap();
     }
 
     //----------------------------------------
     // Write the commands/subcommands sections
     //----------------------------------------
 
-    build_command_markdown(buffer, Vec::new(), command, 0, options).unwrap();
+    build_command_markdown(buffer, &[], command, 0, options).unwrap();
 
     //-----------------
     // Write the footer
@@ -198,7 +197,7 @@ fn write_help_markdown(
 fn build_table_of_contents_markdown(
     buffer: &mut String,
     // Parent commands of `command`.
-    parent_command_path: Vec<String>,
+    parent_command_path: &[String],
     command: &clap::Command,
     depth: usize,
 ) -> std::fmt::Result {
@@ -212,7 +211,7 @@ fn build_table_of_contents_markdown(
 
     // Append the name of `command` to `command_path`.
     let command_path = {
-        let mut command_path = parent_command_path;
+        let mut command_path = parent_command_path.to_owned();
         command_path.push(title_name);
         command_path
     };
@@ -231,7 +230,7 @@ fn build_table_of_contents_markdown(
     for subcommand in command.get_subcommands() {
         build_table_of_contents_markdown(
             buffer,
-            command_path.clone(),
+            &command_path,
             subcommand,
             depth + 1,
         )?;
@@ -288,7 +287,7 @@ fn build_table_of_contents_html(
 fn build_command_markdown(
     buffer: &mut String,
     // Parent commands of `command`.
-    parent_command_path: Vec<String>,
+    parent_command_path: &[String],
     command: &clap::Command,
     depth: usize,
     options: &MarkdownOptions,
@@ -303,7 +302,7 @@ fn build_command_markdown(
 
     // Append the name of `command` to `command_path`.
     let command_path = {
-        let mut command_path = parent_command_path.clone();
+        let mut command_path = parent_command_path.to_owned();
         command_path.push(title_name);
         command_path
     };
@@ -342,7 +341,7 @@ fn build_command_markdown(
             String::new()
         } else {
             let mut s = parent_command_path.join(" ");
-            s.push_str(" ");
+            s.push(' ');
             s
         },
         command
@@ -391,7 +390,7 @@ fn build_command_markdown(
             writeln!(buffer, "* `{title_name}` — {about}",)?;
         }
 
-        write!(buffer, "\n")?;
+        writeln!(buffer)?;
     }
 
     //----------------------------------
@@ -405,7 +404,7 @@ fn build_command_markdown(
             write_arg_markdown(buffer, pos_arg)?;
         }
 
-        write!(buffer, "\n")?;
+        writeln!(buffer)?;
     }
 
     //----------------------------------
@@ -424,7 +423,7 @@ fn build_command_markdown(
             write_arg_markdown(buffer, arg)?;
         }
 
-        write!(buffer, "\n")?;
+        writeln!(buffer)?;
     }
 
     //----------------------------------
@@ -433,12 +432,12 @@ fn build_command_markdown(
 
     // Include extra space between commands. This is purely for the benefit of
     // anyone reading the source .md file.
-    write!(buffer, "\n\n")?;
+    writeln!(buffer, "\n")?;
 
     for subcommand in command.get_subcommands() {
         build_command_markdown(
             buffer,
-            command_path.clone(),
+            &command_path,
             subcommand,
             depth + 1,
             options,
@@ -568,8 +567,7 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
                     },
                     None => format!("  - `{}`\n", pv.get_name()),
                 })
-                .collect::<Vec<String>>()
-                .join("");
+                .collect();
 
             writeln!(buffer, "\n  Possible values:\n{text}")?;
         } else {
@@ -601,8 +599,8 @@ fn get_canonical_name(command: &clap::Command) -> String {
     command
         .get_display_name()
         .or_else(|| command.get_bin_name())
-        .map(|name| name.to_owned())
-        .unwrap_or_else(|| command.get_name().to_owned())
+        .unwrap_or_else(|| command.get_name())
+        .to_owned()
 }
 
 /// Indents non-empty lines. The output always ends with a newline.
