@@ -14,6 +14,7 @@ mod test_readme {
 
 mod utils;
 
+use std::collections::BTreeMap;
 use std::fmt::{self, Write};
 
 use clap::builder::PossibleValue;
@@ -409,7 +410,7 @@ fn build_command_markdown(
     }
 
     //----------------------------------
-    // Options
+    // Options (grouped by help heading)
     //----------------------------------
 
     let non_pos: Vec<_> = command
@@ -418,13 +419,27 @@ fn build_command_markdown(
         .collect();
 
     if !non_pos.is_empty() {
-        writeln!(buffer, "###### **Options:**\n")?;
+        // Group arguments by help heading
+        let mut grouped_args: BTreeMap<&str, Vec<&clap::Arg>> = BTreeMap::new();
 
         for arg in non_pos {
-            write_arg_markdown(buffer, arg)?;
+            let heading = arg.get_help_heading().unwrap_or("Options");
+            grouped_args
+                .entry(heading)
+                .or_insert_with(Vec::new)
+                .push(arg);
         }
 
-        write!(buffer, "\n")?;
+        // Write each group with its heading
+        for (heading, args) in grouped_args {
+            writeln!(buffer, "###### **{heading}:**\n")?;
+
+            for arg in args {
+                write_arg_markdown(buffer, arg)?;
+            }
+
+            write!(buffer, "\n")?;
+        }
     }
 
     //----------------------------------
