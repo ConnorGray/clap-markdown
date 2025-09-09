@@ -154,3 +154,30 @@ This program does things.
 "
     );
 }
+
+/// Test to verify that environment variable is shown in markdown output for an argument with env set.
+#[test]
+fn test_env_var_markdown_output() {
+    let mut app = Command::new("env-test")
+        .about("Test env var output")
+        .arg(
+            Arg::new("config")
+                .short('c')
+                .long("config")
+                .env("CONFIG_PATH")
+                .help("Path to config file"),
+        );
+    let () = app.build();
+
+    let markdown = help_markdown_command_custom(
+        &app,
+        &MarkdownOptions::new().show_footer(false),
+    );
+
+    // Should include [env: `CONFIG_PATH`] in the config option line
+    assert!(
+        markdown.contains("[env: `CONFIG_PATH`]"),
+        "Markdown output should show env var for config argument. Output: {}",
+        markdown
+    );
+}

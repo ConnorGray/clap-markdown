@@ -586,6 +586,16 @@ fn write_arg_markdown(buffer: &mut String, arg: &clap::Arg) -> fmt::Result {
         }
     }
 
+    //-------------------------
+    // Arg environment variable
+    //-------------------------
+
+    if !arg.is_hide_env_set() {
+        if let Some(env) = arg.get_env() {
+            write!(buffer, "  [env: `{}`]\n", env.to_string_lossy())?;
+        }
+    }
+
     Ok(())
 }
 
