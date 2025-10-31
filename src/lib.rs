@@ -125,14 +125,21 @@ pub fn help_markdown_command_custom(
 /// Format the help information for `command` as Markdown and print it.
 ///
 /// Output is printed to the standard output, using [`println!`].
-pub fn print_help_markdown<C: clap::CommandFactory>() {
-    let command = C::command();
-
+pub fn print_help_markdown_command(command: &clap::Command) {
     let mut buffer = String::with_capacity(100);
 
     write_help_markdown(&mut buffer, &command, &Default::default());
 
     println!("{}", buffer);
+}
+
+/// Format the help information for `C: clap::CommandFactory` as Markdown and print it.
+///
+/// Output is printed to the standard output, using [`println!`].
+pub fn print_help_markdown<C: clap::CommandFactory>() {
+    let command = C::command();
+
+    print_help_markdown_command(&command);
 }
 
 fn write_help_markdown(
