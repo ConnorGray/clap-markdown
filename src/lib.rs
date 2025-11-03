@@ -159,6 +159,23 @@ fn write_help_markdown(
     ).unwrap();
 
     //----------------------------------
+    // Write the version if available
+    //----------------------------------
+
+    if let Some(version) = command.get_version() {
+        let version_str = version.to_string();
+
+        // Check if version contains multiple lines
+        if version_str.contains('\n') {
+            // Multi-line version: use a code block
+            writeln!(buffer, "**Version:**\n\n```\n{}\n```\n", version_str.trim()).unwrap();
+        } else {
+            // Single-line version: use inline code
+            writeln!(buffer, "**Version:** `{}`\n", version_str).unwrap();
+        }
+    }
+
+    //----------------------------------
     // Write the table of contents
     //----------------------------------
 
