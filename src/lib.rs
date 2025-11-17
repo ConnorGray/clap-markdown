@@ -148,15 +148,27 @@ fn write_help_markdown(
 
     let title = match options.title {
         Some(ref title) => title.to_owned(),
-        None => format!("Command-Line Help for `{title_name}`"),
+        None => {
+            // Try to use the command's about text as the title
+            if let Some(about) = command.get_about() {
+                about.to_string()
+            } else {
+                format!("Command-Line Help for `{title_name}`")
+            }
+        },
     };
     writeln!(buffer, "# {title}\n",).unwrap();
 
-    writeln!(
-        buffer,
-        "This document contains the help content for the `{}` command-line program.\n",
-        title_name
-    ).unwrap();
+    // Use the command's long_about or about text as the introduction, if available
+    if let Some(long_about) = command.get_long_about() {
+        writeln!(buffer, "{}\n", long_about).unwrap();
+    } else {
+        writeln!(
+            buffer,
+            "This document contains the help content for the `{}` command-line program.\n",
+            title_name
+        ).unwrap();
+    }
 
     //----------------------------------
     // Write the table of contents
