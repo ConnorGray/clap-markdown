@@ -1,10 +1,115 @@
-//! Autogenerate Markdown documentation for clap command-line tools
+//! This module provides functionality to generate help documentation for
+//! `clap`-based command-line applications in Markdown format.
 //!
-//! See [**Examples**][Examples] for examples of the content `clap-markdown`
-//! generates.
+//! It includes a set of features for customization such as adding custom titles,
+//! formatting options, table of contents, aliases, and supporting both single-file
+//! and multi-file outputs.
 //!
-//! [Examples]: https://github.com/ConnorGray/clap-markdown#Examples
+//! ## Public API Summary
 //!
+//! - [`MarkdownOptions`]:
+//!     - Struct for configuring various settings when generating Markdown documentation.
+//!     - Example: Enabling/disabling the footer, table of contents, and aliases.
+//!
+//! - [`Markdown`]:
+//!     - Struct representing the Markdown output, allowing further modifications and rendering.
+//!
+//! - Functions:
+//!     - [`help_markdown`]: Generate Markdown-formatted help information for a `clap` command with default options.
+//!     - [`help_markdown_custom`]: Generate Markdown-formatted help information with custom options.
+//!     - [`print_help_markdown`]: Generate and print Markdown-formatted help output to the console.
+//!
+//! ## Customization
+//!
+//! The `MarkdownOptions` struct provides the following options:
+//!
+//! - Set a custom title for the documentation.
+//! - Enable or disable the default footer.
+//! - Enable or disable the table of contents.
+//! - Enable or disable the display of command aliases.
+//! - Choose between single-file or multi-file documentation output.
+//!
+//! ## Example Usage
+//!
+//! ```rust
+//! use clap::Parser;
+//!
+//! #[derive(Parser)]
+//! struct Cli {
+//!     #[arg()]
+//!     name: String,
+//! }
+//!
+//! let markdown: String = clap_markdown::help_markdown::<Cli>();
+//! println!("{}", markdown);
+//! ```
+//!
+//! This describes two conventions for using `clap-markdown`:
+//! 1. Add a hidden `--markdown-help` option to your `clap` application:
+//! ```rust
+//! use clap::Parser;
+//!
+//! #[derive(Parser)]
+//! struct Cli {
+//!     #[arg(long, hide = true)]
+//!     markdown_help: bool,
+//! }
+//!
+//! fn main() {
+//!     let args = Cli::parse();
+//!
+//!     // Invoked as: `$ my-app --markdown-help`
+//!     if args.markdown_help {
+//!         clap_markdown::print_help_markdown::<Cli>();
+//!     }
+//! }
+//! ```
+//!
+//! And then invoke with `--markdown-help` to generate a `CommandLineHelp.md` file:
+//!
+//! ```shell
+//! cargo run -- --markdown-help > docs/CommandLineHelp.md
+//! ```
+//!
+//! 2. You can use the output from any of the [`help_markdown_*_md`] functions.
+//!
+//! ```rust
+//! # use tempfile::tempdir;
+//! use std::path::PathBuf;
+//! use clap::Parser;
+//! use clap_markdown::{Markdown, help_markdown_md};
+//!
+//! #[derive(Parser)]
+//! struct Cli {
+//!     #[arg(long, hide = true)]
+//!     markdown_help: bool,
+//! }
+//!
+//!
+//! fn main() {
+//!     let args = Cli::parse();
+//!     let md_path = PathBuf::from("CommandLineHelp.md");
+//!     # let dir = tempdir().unwrap();
+//!     # let md_path = dir.path().join(md_path);
+//!     // Invoked as: `$ my-app --markdown-help`
+//!     if args.markdown_help {
+//!         let md: Markdown = help_markdown_md::<Cli>();
+//!         md.write(&md_path).expect("Failed to write Markdown help");
+//!     }
+//! }
+//! ```
+//!
+//! In either case, save `CommandLineHelp.md` in git, and link to it from the project's README.md or other relevant documentation.
+//! Comitting `CommandLineHelp.md` to version control makes it easy to track user-visible changes to the command-line interface.
+//! For projects that have multiple associated executables, consider using the
+//! command name as a suffix.
+//! For example: `CommandLineHelp-your-app.md`, `CommandLineHelp-other-app.md`.
+//!
+//! ## Notes
+//!
+//! - This crate assumes `clap` is used as the command-line parsing library.
+//! - For multi-file documentation output, any of the [`help_markdown_*_md`] functions
+//!   provide a [`Markdown`] struct that can be further handled for multiple files.
 
 // Ensure that doc tests in the README.md file get run.
 #[doc(hidden)]
