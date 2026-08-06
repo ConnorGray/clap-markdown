@@ -14,10 +14,10 @@ mod test_readme {
 
 mod utils;
 
-use std::fmt::{self, Write};
-
+use clap;
 use clap::builder::PossibleValue;
-
+use std::fmt::Write;
+use std::{fmt, fs, path};
 use utils::pluralize;
 
 //======================================
@@ -27,95 +27,273 @@ use utils::pluralize;
 /// Options to customize the structure of the output Markdown document.
 ///
 /// Used with [`help_markdown_custom()`].
+#[derive(Clone)]
 #[non_exhaustive]
 pub struct MarkdownOptions {
     title: Option<String>,
     show_footer: bool,
     show_table_of_contents: bool,
     show_aliases: bool,
+    multiple_files: MultipleFiles,
+}
+
+#[derive(Clone, PartialEq)]
+enum MultipleFiles {
+    Single,
+    Multiple,
 }
 
 impl MarkdownOptions {
     /// Construct a default instance of `MarkdownOptions`.
     pub fn new() -> Self {
-        return Self {
+        Self {
             title: None,
             show_footer: true,
             show_table_of_contents: true,
             show_aliases: true,
-        };
+            multiple_files: MultipleFiles::Single,
+        }
     }
 
     /// Set a custom title to use in the generated document.
     pub fn title(mut self, title: String) -> Self {
         self.title = Some(title);
 
-        return self;
+        self
     }
 
     /// Whether to show the default footer advertising `clap-markdown`.
     pub fn show_footer(mut self, show: bool) -> Self {
         self.show_footer = show;
 
-        return self;
+        self
     }
 
     /// Whether to show the default table of contents.
     pub fn show_table_of_contents(mut self, show: bool) -> Self {
         self.show_table_of_contents = show;
 
-        return self;
+        self
     }
 
     /// Whether to show aliases for arguments and commands.
     pub fn show_aliases(mut self, show: bool) -> Self {
         self.show_aliases = show;
 
-        return self;
+        self
+    }
+
+    /// Whether to generate multiple files for the documentation.
+    pub fn multiple_files(mut self) -> Self {
+        self.multiple_files = MultipleFiles::Multiple;
+
+        self
+    }
+    pub fn single_file(mut self) -> Self {
+        self.multiple_files = MultipleFiles::Single;
+        self
     }
 }
 
 impl Default for MarkdownOptions {
     fn default() -> Self {
-        return Self::new();
+        Self::new()
     }
 }
 
+pub struct Markdown {
+    multi: MultipleFiles,
+    options: MarkdownOptions,
+    text: Vec<String>,
+    commands: Vec<String>,
+}
+
+impl From<Markdown> for String {
+    fn from(md: Markdown) -> Self {
+        let text = md.text.join("");
+        if md.options.show_footer {
+            format!("{}{}", text, footer())
+        } else {
+            text.clone()
+        }
+    }
+}
+
+impl From<&Markdown> for String {
+    fn from(md: &Markdown) -> Self {
+        let text = md.text.join("");
+        if md.options.show_footer {
+            format!("{}{}", text, footer())
+        } else {
+            text.clone()
+        }
+    }
+}
+
+impl Markdown {
+    /// Create a new `Markdown` instance.
+    ///
+    /// `text` holds the rendered Markdown sections and `commands` holds the
+    /// corresponding command paths used when writing multi-file output.
+    pub fn new(
+        markdown_options: &MarkdownOptions,
+        text: Vec<String>,
+        commands: Vec<String>,
+    ) -> Markdown {
+        Markdown {
+            multi: markdown_options.multiple_files.clone(),
+            options: markdown_options.clone(),
+            text,
+            commands,
+        }
+    }
+
+    /// Iterate over rendered Markdown text and its associated command path.
+    ///
+    /// Each item is `(text, command_path)`.
+    pub fn iter(&self) -> impl Iterator<Item = (&String, &String)> {
+        self.into_iter()
+    }
+
+    fn write_files(&self, path: &path::PathBuf) -> std::io::Result<()> {
+        for (text, command) in self.iter() {
+            let help_path = path.join(command).with_extension("md");
+            match help_path.parent() {
+                Some(parent) => fs::create_dir_all(parent)?,
+                None => (),
+            }
+            let text = if self.options.show_footer {
+                format!("{}{}", text, footer())
+            } else {
+                text.clone()
+            };
+            fs::write(help_path, text)?
+        }
+        Ok(())
+    }
+    fn write_text(&self, path: &path::PathBuf) -> std::io::Result<()> {
+        fs::write(path, String::from(self))
+    }
+
+    /// Write the Markdown output to disk.
+    ///
+    /// Uses the configured output mode:
+    /// - [`MarkdownOptions::single_file`] writes one file to `path`
+    /// - [`MarkdownOptions::multiple_files`] writes one file per command under `path`
+    ///
+    /// Returns an I/O error if files or parent directories cannot be created.
+    pub fn write(&self, path: &path::PathBuf) -> std::io::Result<()> {
+        match self.multi {
+            MultipleFiles::Single => self.write_text(path),
+            MultipleFiles::Multiple => self.write_files(path),
+        }
+    }
+}
+
+impl<'a> IntoIterator for &'a Markdown {
+    type Item = (&'a String, &'a String);
+    type IntoIter = std::iter::Zip<
+        std::slice::Iter<'a, String>,
+        std::slice::Iter<'a, String>,
+    >;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.text.iter().zip(self.commands.iter())
+    }
+}
+
+impl fmt::Display for Markdown {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "{}", String::from(self))
+    }
+}
 //======================================
 // Public API functions
 //======================================
 
-/// Format the help information for `command` as Markdown.
+/// Generate Markdown help for `C` using default [`MarkdownOptions`].
+///
+/// Convenience wrapper around [`help_markdown_command`].
 pub fn help_markdown<C: clap::CommandFactory>() -> String {
     let command = C::command();
 
     help_markdown_command(&command)
 }
 
-/// Format the help information for `command` as Markdown, with custom options.
+/// Generate Markdown help for `C` using custom [`MarkdownOptions`].
+///
+/// Convenience wrapper around [`help_markdown_command_custom`].
 pub fn help_markdown_custom<C: clap::CommandFactory>(
     options: &MarkdownOptions,
 ) -> String {
     let command = C::command();
 
-    return help_markdown_command_custom(&command, options);
+    help_markdown_command_custom(&command, options)
 }
 
-/// Format the help information for `command` as Markdown.
+/// Generate Markdown help for an existing [`clap::Command`] using default options.
+///
+/// Convenience wrapper around [`help_markdown_command_custom`].
 pub fn help_markdown_command(command: &clap::Command) -> String {
-    return help_markdown_command_custom(command, &Default::default());
+    help_markdown_command_custom(command, &Default::default())
 }
 
-/// Format the help information for `command` as Markdown, with custom options.
+/// Generate Markdown help for an existing [`clap::Command`] using custom options.
+///
+/// Returns a single `String` document formatted as Markdown.
+///
+/// # Panics
+///
+/// Panics if `options.multiple_files()` is enabled.
+/// Use [`help_markdown_command_custom_md`] when generating multi-file output.
 pub fn help_markdown_command_custom(
     command: &clap::Command,
     options: &MarkdownOptions,
 ) -> String {
-    let mut buffer = String::with_capacity(100);
+    if options.multiple_files == MultipleFiles::Multiple {
+        panic!("`multiple_files` is not supported for `help_markdown_command_custom`. Use `help_markdown_command_custom_md` instead, which returns a `Markdown` struct that can be written to multiple files.");
+    }
+    let markdown = help_markdown_command_custom_md(command, options);
+    markdown.into()
+}
 
-    write_help_markdown(&mut buffer, &command, options);
+/// Generate Markdown help for `C` using default options, returning structured output.
+///
+/// Returns [`Markdown`] so callers can render or write multiple files.
+pub fn help_markdown_md<C: clap::CommandFactory>() -> Markdown {
+    let command = C::command();
 
-    buffer
+    help_markdown_command_md(&command)
+}
+
+/// Generate Markdown help for `C` using custom options, returning structured output.
+///
+/// Returns [`Markdown`] so callers can render or write multiple files.
+pub fn help_markdown_custom_md<C: clap::CommandFactory>(
+    options: &MarkdownOptions,
+) -> Markdown {
+    let command = C::command();
+
+    help_markdown_command_custom_md(&command, options)
+}
+
+/// Generate Markdown help for an existing [`clap::Command`] using default options.
+///
+/// Returns [`Markdown`] so callers can render or write multiple files.
+pub fn help_markdown_command_md(command: &clap::Command) -> Markdown {
+    help_markdown_command_custom_md(command, &Default::default())
+}
+
+/// Canonical Markdown generator for an existing [`clap::Command`].
+///
+/// All public `help_markdown*` helpers delegate to this function.
+///
+/// Returns [`Markdown`] so callers can render or write multiple files.
+pub fn help_markdown_command_custom_md(
+    command: &clap::Command,
+    options: &MarkdownOptions,
+) -> Markdown {
+    build_command_markdown_process(command, options)
 }
 
 //======================================
@@ -127,72 +305,63 @@ pub fn help_markdown_command_custom(
 /// Output is printed to the standard output, using [`println!`].
 pub fn print_help_markdown<C: clap::CommandFactory>() {
     let command = C::command();
+    let markdown = help_markdown_command_md(&command);
 
-    let mut buffer = String::with_capacity(100);
-
-    write_help_markdown(&mut buffer, &command, &Default::default());
-
-    println!("{}", buffer);
+    println!("{}", markdown);
 }
 
-fn write_help_markdown(
+fn write_preamble_markdown(
     buffer: &mut String,
     command: &clap::Command,
     options: &MarkdownOptions,
-) {
-    //----------------------------------
-    // Write the document title
-    //----------------------------------
+) -> fmt::Result {
+    write_title_markdown(buffer, command, options)?;
 
+    if options.show_table_of_contents {
+        writeln!(buffer, "**Command Overview:**\n")?;
+
+        build_table_of_contents_markdown(
+            buffer,
+            Vec::new(),
+            command,
+            0,
+            options,
+        )?;
+
+        write!(buffer, "\n")?;
+    }
+    Ok(())
+}
+
+fn write_title_markdown(
+    buffer: &mut String,
+    command: &clap::Command,
+    options: &MarkdownOptions,
+) -> fmt::Result {
     let title_name = get_canonical_name(command);
 
     let title = match options.title {
         Some(ref title) => title.to_owned(),
         None => format!("Command-Line Help for `{title_name}`"),
     };
-    writeln!(buffer, "# {title}\n",).unwrap();
+    writeln!(buffer, "# {title}\n",)?;
 
     writeln!(
         buffer,
         "This document contains the help content for the `{}` command-line program.\n",
         title_name
-    ).unwrap();
+    )?;
+    Ok(())
+}
 
-    //----------------------------------
-    // Write the table of contents
-    //----------------------------------
-
-    // writeln!(buffer, r#"<div style="background: light-gray"><ul>"#).unwrap();
-    // build_table_of_contents_html(buffer, Vec::new(), command, 0).unwrap();
-    // writeln!(buffer, "</ul></div>").unwrap();
-
-    if options.show_table_of_contents {
-        writeln!(buffer, "**Command Overview:**\n").unwrap();
-
-        build_table_of_contents_markdown(buffer, Vec::new(), command, 0)
-            .unwrap();
-
-        write!(buffer, "\n").unwrap();
-    }
-
-    //----------------------------------------
-    // Write the commands/subcommands sections
-    //----------------------------------------
-
-    build_command_markdown(buffer, Vec::new(), command, 0, options).unwrap();
-
-    //-----------------
-    // Write the footer
-    //-----------------
-    if options.show_footer {
-        write!(buffer, r#"<hr/>
+fn footer() -> &'static str {
+    r#"<hr/>
 
 <small><i>
     This document was generated automatically by
     <a href="https://crates.io/crates/clap-markdown"><code>clap-markdown</code></a>.
 </i></small>
-"#).unwrap();
-    }
+"#
 }
 
 fn build_table_of_contents_markdown(
@@ -201,7 +370,8 @@ fn build_table_of_contents_markdown(
     parent_command_path: Vec<String>,
     command: &clap::Command,
     depth: usize,
-) -> std::fmt::Result {
+    markdown_options: &MarkdownOptions,
+) -> fmt::Result {
     // Don't document commands marked with `clap(hide = true)` (which includes
     // `print-all-help`).
     if command.is_hide_set() {
@@ -216,13 +386,19 @@ fn build_table_of_contents_markdown(
         command_path.push(title_name);
         command_path
     };
-
-    writeln!(
-        buffer,
-        "* [`{}`↴](#{})",
-        command_path.join(" "),
-        command_path.join("-"),
-    )?;
+    let contents = match markdown_options.multiple_files {
+        MultipleFiles::Multiple => format!(
+            "* [`{}`]({}.md)",
+            command_path.join(" "),
+            command_path.join("/")
+        ),
+        MultipleFiles::Single => format!(
+            "* [`{}`↴](#{})",
+            command_path.join(" "),
+            command_path.join("-")
+        ),
+    };
+    writeln!(buffer, "{}", contents)?;
 
     //----------------------------------
     // Recurse to write subcommands
@@ -234,95 +410,20 @@ fn build_table_of_contents_markdown(
             command_path.clone(),
             subcommand,
             depth + 1,
+            markdown_options,
         )?;
     }
 
     Ok(())
 }
 
-/*
-fn build_table_of_contents_html(
-    buffer: &mut String,
+fn build_command_markdown_parts(
     // Parent commands of `command`.
-    parent_command_path: Vec<String>,
+    parent_command_path: &Vec<String>,
     command: &clap::Command,
-    depth: usize,
-) -> std::fmt::Result {
-    // Don't document commands marked with `clap(hide = true)` (which includes
-    // `print-all-help`).
-    if command.is_hide_set() {
-        return Ok(());
-    }
-
-    // Append the name of `command` to `command_path`.
-    let command_path = {
-        let mut command_path = parent_command_path;
-        command_path.push(command.get_name().to_owned());
-        command_path
-    };
-
-    writeln!(
-        buffer,
-        "<li><a href=\"#{}\"><code>{}</code>↴</a></li>",
-        command_path.join("-"),
-        command_path.join(" ")
-    )?;
-
-    //----------------------------------
-    // Recurse to write subcommands
-    //----------------------------------
-
-    for subcommand in command.get_subcommands() {
-        build_table_of_contents_html(
-            buffer,
-            command_path.clone(),
-            subcommand,
-            depth + 1,
-        )?;
-    }
-
-    Ok(())
-}
-*/
-
-fn build_command_markdown(
-    buffer: &mut String,
-    // Parent commands of `command`.
-    parent_command_path: Vec<String>,
-    command: &clap::Command,
-    depth: usize,
     options: &MarkdownOptions,
-) -> std::fmt::Result {
-    // Don't document commands marked with `clap(hide = true)` (which includes
-    // `print-all-help`).
-    if command.is_hide_set() {
-        return Ok(());
-    }
-
-    let title_name = get_canonical_name(command);
-
-    // Append the name of `command` to `command_path`.
-    let command_path = {
-        let mut command_path = parent_command_path.clone();
-        command_path.push(title_name);
-        command_path
-    };
-
-    //----------------------------------
-    // Write the markdown heading
-    //----------------------------------
-
-    // TODO: `depth` is now unused. Remove if no other use for it appears.
-    /*
-    if depth >= 6 {
-        panic!(
-            "command path nesting depth is deeper than maximum markdown header depth: `{}`",
-            command_path.join(" ")
-        )
-    }
-    */
-    writeln!(buffer, "## `{}`\n", command_path.join(" "))?;
-
+) -> Result<String, fmt::Error> {
+    let mut buffer = String::with_capacity(100);
     if let Some(long_about) = command.get_long_about() {
         writeln!(buffer, "{}\n", long_about)?;
     } else if let Some(about) = command.get_about() {
@@ -335,22 +436,7 @@ fn build_command_markdown(
         writeln!(buffer, "{}\n", help)?;
     }
 
-    writeln!(
-        buffer,
-        "**Usage:** `{}{}`\n",
-        if parent_command_path.is_empty() {
-            String::new()
-        } else {
-            let mut s = parent_command_path.join(" ");
-            s.push_str(" ");
-            s
-        },
-        command
-            .clone()
-            .render_usage()
-            .to_string()
-            .replace("Usage: ", "")
-    )?;
+    write_usage(parent_command_path, command, &mut buffer)?;
 
     if options.show_aliases {
         let aliases = command.get_visible_aliases().collect::<Vec<&str>>();
@@ -369,48 +455,24 @@ fn build_command_markdown(
         writeln!(buffer, "{}\n", help)?;
     }
 
-    //----------------------------------
-    // Subcommands
-    //----------------------------------
-
     if command.get_subcommands().next().is_some() {
-        writeln!(buffer, "###### **Subcommands:**\n")?;
-
-        for subcommand in command.get_subcommands() {
-            if subcommand.is_hide_set() {
-                continue;
-            }
-
-            let title_name = get_canonical_name(subcommand);
-
-            let about = match subcommand.get_about() {
-                Some(about) => about.to_string(),
-                None => String::new(),
-            };
-
-            writeln!(buffer, "* `{title_name}` — {about}",)?;
-        }
-
-        write!(buffer, "\n")?;
+        let subcom = build_command_markdown_subcommands(
+            command,
+            parent_command_path,
+            options,
+        )?;
+        write!(buffer, "{}\n", subcom)?;
     }
-
-    //----------------------------------
-    // Arguments
-    //----------------------------------
 
     if command.get_positionals().next().is_some() {
         writeln!(buffer, "###### **Arguments:**\n")?;
 
         for pos_arg in command.get_positionals() {
-            write_arg_markdown(buffer, pos_arg)?;
+            write_arg_markdown(&mut buffer, pos_arg)?;
         }
 
         write!(buffer, "\n")?;
     }
-
-    //----------------------------------
-    // Options
-    //----------------------------------
 
     let non_pos: Vec<_> = command
         .get_arguments()
@@ -421,30 +483,126 @@ fn build_command_markdown(
         writeln!(buffer, "###### **Options:**\n")?;
 
         for arg in non_pos {
-            write_arg_markdown(buffer, arg)?;
+            write_arg_markdown(&mut buffer, arg)?;
         }
 
         write!(buffer, "\n")?;
     }
+    Ok(buffer)
+}
 
-    //----------------------------------
-    // Recurse to write subcommands
-    //----------------------------------
+fn write_usage(
+    parent_command_path: &Vec<String>,
+    command: &clap::Command,
+    buffer: &mut String,
+) -> Result<(), fmt::Error> {
+    let command_path = if parent_command_path.is_empty() {
+        String::new()
+    } else {
+        let mut s = parent_command_path.join(" ");
+        s.push(' ');
+        s
+    };
+    let command = command
+        .clone()
+        .render_usage()
+        .to_string()
+        .replace("Usage: ", "");
 
-    // Include extra space between commands. This is purely for the benefit of
-    // anyone reading the source .md file.
-    write!(buffer, "\n\n")?;
+    writeln!(buffer, "**Usage:** `{}{}`\n", command_path, command)?;
+    Ok(())
+}
+
+fn build_command_markdown_subcommands(
+    command: &clap::Command,
+    parent_command_path: &Vec<String>,
+    options: &MarkdownOptions,
+) -> Result<String, fmt::Error> {
+    let mut buffer = String::with_capacity(100);
+    writeln!(buffer, "###### **Subcommands:**\n")?;
+    for subcommand in command.get_subcommands() {
+        if subcommand.is_hide_set() {
+            continue;
+        }
+
+        let title_name = get_canonical_name(subcommand);
+
+        let about = match subcommand.get_about() {
+            Some(about) => about.to_string(),
+            None => String::new(),
+        };
+        let link_path = match options.multiple_files {
+            MultipleFiles::Single => format!("`{title_name}`"),
+            MultipleFiles::Multiple => {
+                let command_path_str: String = parent_command_path
+                    .last()
+                    .unwrap_or(&String::new())
+                    .clone();
+                format!("[`{title_name}`]({command_path_str}/{title_name}.md)")
+            },
+        };
+
+        writeln!(buffer, "* {link_path} — {about}",)?;
+    }
+    Ok(buffer.to_string())
+}
+
+fn build_command_markdown_process(
+    command: &clap::Command,
+    options: &MarkdownOptions,
+) -> Markdown {
+    let mut vec_buffer = Vec::new();
+    let mut cmd_buffer = Vec::new();
+
+    build_command_markdown(
+        &mut vec_buffer,
+        &mut cmd_buffer,
+        Vec::new(),
+        command,
+        options,
+    )
+    .unwrap();
+    Markdown::new(options, vec_buffer, cmd_buffer)
+}
+fn build_command_markdown(
+    vec_buffer: &mut Vec<String>,
+    cmd_buffer: &mut Vec<String>,
+    // Parent commands of `command`.
+    parent_command_path: Vec<String>,
+    command: &clap::Command,
+    options: &MarkdownOptions,
+) -> fmt::Result {
+    if command.is_hide_set() {
+        return Ok(());
+    }
+    let mut buffer = String::with_capacity(100);
+    let title_name = get_canonical_name(command);
+    let command_path = {
+        let mut command_path = parent_command_path.clone();
+        command_path.push(title_name);
+        command_path
+    };
+    if parent_command_path.is_empty() {
+        write_preamble_markdown(&mut buffer, command, options)?;
+        cmd_buffer.push(String::from("index"));
+    } else {
+        cmd_buffer.push(command_path.join("/"));
+    }
+    writeln!(buffer, "## `{}`\n", command_path.join(" "))?;
+    let cmd_md =
+        build_command_markdown_parts(&parent_command_path, command, options)?;
+    write!(buffer, "{}\n\n", cmd_md)?;
+    vec_buffer.push(buffer);
 
     for subcommand in command.get_subcommands() {
         build_command_markdown(
-            buffer,
+            vec_buffer,
+            cmd_buffer,
             command_path.clone(),
             subcommand,
-            depth + 1,
             options,
         )?;
     }
-
     Ok(())
 }
 
